@@ -72,6 +72,36 @@ public class ServidorBingoImpl extends UnicastRemoteObject implements IBingoServ
     public synchronized int obtenerUltimoNumero() throws RemoteException {
         return ultimoNumeroSacado;
     }
+
+	@Override
+	public boolean marcarNumero(int idJugador, int numero) throws RemoteException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean cantarLinea(int idJugador) throws RemoteException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean cantarBingo(int idJugador) throws RemoteException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean responderPregunta(int idJugador, String respuesta) throws RemoteException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public String obtenerPreguntaActual(int idJugador) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
 
 
