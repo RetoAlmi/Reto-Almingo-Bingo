@@ -126,7 +126,7 @@ public class ClienteBingo {
     private static void imprimirCarton(int[][] carton, Set<Integer> numerosSalidos) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 9; j++) {
-                if (carton[i][j] == -1) {
+                if (carton[i][j] == 0) {
                     System.out.print("[  0  ]\t"); // Sustituido X por 0
                 } else {
                     int num = carton[i][j];

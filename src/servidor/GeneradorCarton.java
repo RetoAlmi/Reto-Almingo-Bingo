@@ -9,16 +9,16 @@ public class GeneradorCarton {
 
     public static int[][] generarCarton3x9() {
         int[][] carton = new int[3][9];
-        // Inicializar todas las casillas con -1 (vacío)
+        // Inicializar todas las casillas con 0 (vacío)
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 9; j++) {
-                carton[i][j] = -1;
+                carton[i][j] = 0;
             }
         }
 
         Random rand = new Random();
         // Para cada columna (0 a 8), elegir números únicos por rango
-        // Columna 0: 1-9, Columna 1: 10-19 ... Columna 8: 80-90
+        // Columna 0: 1-9, Columna 1: 1009 ... Columna 8: 80-90
         List<List<Integer>> numerosPorColumna = new ArrayList<>();
         for (int col = 0; col < 9; col++) {
             List<Integer> posibles = new ArrayList<>();
@@ -41,7 +41,7 @@ public class GeneradorCarton {
             for (int k = 0; k < 5; k++) {
                 int col = columnasDisponibles.get(k);
                 // Si la casilla ya tiene un número, buscar la siguiente disponible en esa columna
-                if (carton[fila][col] == -1) {
+                if (carton[fila][col] == 0) {
                     carton[fila][col] = numerosPorColumna.get(col).remove(0);
                 }
             }
