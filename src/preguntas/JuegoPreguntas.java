@@ -19,7 +19,6 @@ public class JuegoPreguntas {
 
 			String linea;
 
-
 			br.readLine();
 
 			linea = br.readLine();
