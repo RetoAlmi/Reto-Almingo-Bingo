@@ -1,8 +1,9 @@
 package servidor;
 
-import comun.Config;
 import java.io.*;
 import java.util.*;
+
+import comun.Config;
 
 public class ServidorBingo {
 
