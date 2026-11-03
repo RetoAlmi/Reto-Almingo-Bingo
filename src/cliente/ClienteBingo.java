@@ -1,9 +1,8 @@
 package cliente;
 
+import comun.Config;
 import java.io.*;
 import java.util.*;
-
-import comun.Config;
 
 public class ClienteBingo {
 
@@ -15,50 +14,49 @@ public class ClienteBingo {
         String nombreUsuario = scanner.nextLine().trim();
 
         File dirUsuarios = new File(Config.RUTA_COMPARTIDA + "\\usuarios");
-        File dirJugador = buscarCarpetaPorNombre(dirUsuarios, nombreUsuario);
-
-        if (dirJugador == null) {
-            String uid = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-            String nombreCarpeta = nombreUsuario + "-" + uid;
-            dirJugador = new File(dirUsuarios, nombreCarpeta);
-            dirJugador.mkdirs();
-
-            // Guardar archivo numero-{nombre-uid}.txt
-            File fId = new File(dirJugador, "numero-" + nombreCarpeta + ".txt");
-            try (PrintWriter pw = new PrintWriter(new FileWriter(fId))) {
-                pw.println(nombreCarpeta);
-                pw.println(nombreUsuario);
-            } catch (IOException e) {
-                System.err.println("Error al guardar el identificador: " + e.getMessage());
-            }
-
-            // Generar y guardar el cartón 3x9
-            int[][] carton = servidor.GeneradorCarton.generarCarton3x9();
-            File fCarton = new File(dirJugador, "carton.txt");
-            try (PrintWriter pw = new PrintWriter(new FileWriter(fCarton))) {
-                for (int i = 0; i < 3; i++) {
-                    for (int j = 0; j < 9; j++) {
-                        pw.println(carton[i][j]);
-                    }
-                }
-            } catch (IOException e) {
-                System.err.println("Error al guardar el cartón: " + e.getMessage());
-            }
-            
-            System.out.println("\n[INFO] ¡Registro completado! Carpeta creada: " + nombreCarpeta);
-        } else {
-            System.out.println("\n[INFO] ¡Bienvenido de nuevo, " + nombreUsuario + "!");
+        if (!dirUsuarios.exists()) {
+            dirUsuarios.mkdirs();
         }
 
-        // Cargar el cartón
+        // Generar siempre un nuevo UID único para este acceso
+        String uid = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String nombreCarpeta = nombreUsuario + "-" + uid;
+        File dirJugador = new File(dirUsuarios, nombreCarpeta);
+        dirJugador.mkdirs();
+
+        // 1. Guardar archivo numero-{nombre-uid}.txt
+        File fId = new File(dirJugador, "numero-" + nombreCarpeta + ".txt");
+        try (PrintWriter pw = new PrintWriter(new FileWriter(fId))) {
+            pw.println(nombreCarpeta);
+            pw.println(nombreUsuario);
+        } catch (IOException e) {
+            System.err.println("Error al guardar el identificador: " + e.getMessage());
+        }
+
+        // 2. Generar y guardar un nuevo cartón 3x9 exclusivo para esta sesión
+        int[][] carton = servidor.GeneradorCarton.generarCarton3x9();
         File fCarton = new File(dirJugador, "carton.txt");
-        int[][] carton = cargarCarton(fCarton);
+        try (PrintWriter pw = new PrintWriter(new FileWriter(fCarton))) {
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 9; j++) {
+                    pw.println(carton[i][j]);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error al guardar el cartón: " + e.getMessage());
+        }
+        
+        System.out.println("\n[INFO] ¡Nueva sesión creada con éxito!");
+        System.out.println("-> Carpeta asignada: " + nombreCarpeta);
+
+        // Cargar el cartón recién creado
+        int[][] cartonCargado = cargarCarton(fCarton);
         
         // Obtener los números que han salido para tachar los que correspondan
         Set<Integer> numerosSalidos = cargarNumerosSalidosSet();
 
         System.out.println("\n=== TU CARTÓN DE BINGO (3x9) ===");
-        imprimirCarton(carton, numerosSalidos);
+        imprimirCarton(cartonCargado, numerosSalidos);
 
         System.out.println("\n1. Ver números que han salido");
         System.out.println("2. Responder Pregunta de Sostenibilidad (para cantar)");
@@ -70,23 +68,6 @@ public class ClienteBingo {
         } else if (opt == 2) {
             hacerPreguntaSostenibilidad(scanner);
         }
-    }
-
-    private static File buscarCarpetaPorNombre(File dirUsuarios, String nombreBuscado) {
-        if (!dirUsuarios.exists() || !dirUsuarios.isDirectory()) {
-            return null;
-        }
-
-        File[] carpetas = dirUsuarios.listFiles(File::isDirectory);
-        if (carpetas == null) return null;
-
-        for (File carpeta : carpetas) {
-            // El nombre de la carpeta empieza por el nombre del usuario seguido de un guion
-            if (carpeta.getName().toLowerCase().startsWith(nombreBuscado.toLowerCase() + "-")) {
-                return carpeta;
-            }
-        }
-        return null;
     }
 
     private static int[][] cargarCarton(File fCarton) {
@@ -119,7 +100,7 @@ public class ClienteBingo {
                 }
             }
         } catch (IOException e) {
-            // Si hay error leyendo, se devuelve vacío
+            // Ignorar errores de lectura puntuales
         }
         return salidos;
     }
@@ -127,8 +108,8 @@ public class ClienteBingo {
     private static void imprimirCarton(int[][] carton, Set<Integer> numerosSalidos) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 9; j++) {
-                if (carton[i][j] == 0) {
-                    System.out.print("[  0  ]\t"); // Sustituido X por 0
+                if (carton[i][j] == -1) {
+                    System.out.print("[  0  ]\t"); // Hueco vacío representado como 0
                 } else {
                     int num = carton[i][j];
                     if (numerosSalidos.contains(num)) {
