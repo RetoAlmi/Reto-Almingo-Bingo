@@ -13,20 +13,19 @@ public class ClienteBingo {
         System.out.print("Introduce tu nombre: ");
         String nombreUsuario = scanner.nextLine().trim();
 
-        // Buscar si ya existe una carpeta de usuario con este nombre en la red
         File dirUsuarios = new File(Config.RUTA_COMPARTIDA + "\\usuarios");
         File dirJugador = buscarCarpetaPorNombre(dirUsuarios, nombreUsuario);
 
-        // Si no existe, lo creamos automáticamente (así hace de registro automático en el cliente)
         if (dirJugador == null) {
-            String uid = "USER-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-            dirJugador = new File(dirUsuarios, uid);
+            String uid = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+            String nombreCarpeta = nombreUsuario + "-" + uid;
+            dirJugador = new File(dirUsuarios, nombreCarpeta);
             dirJugador.mkdirs();
 
-            // Guardar archivo numero-{uid}.txt
-            File fId = new File(dirJugador, "numero-" + uid + ".txt");
+            // Guardar archivo numero-{nombre-uid}.txt
+            File fId = new File(dirJugador, "numero-" + nombreCarpeta + ".txt");
             try (PrintWriter pw = new PrintWriter(new FileWriter(fId))) {
-                pw.println(uid);
+                pw.println(nombreCarpeta);
                 pw.println(nombreUsuario);
             } catch (IOException e) {
                 System.err.println("Error al guardar el identificador: " + e.getMessage());
@@ -45,17 +44,20 @@ public class ClienteBingo {
                 System.err.println("Error al guardar el cartón: " + e.getMessage());
             }
             
-            System.out.println("\n[INFO] ¡Registro completado! UID asignado: " + uid);
+            System.out.println("\n[INFO] ¡Registro completado! Carpeta creada: " + nombreCarpeta);
         } else {
             System.out.println("\n[INFO] ¡Bienvenido de nuevo, " + nombreUsuario + "!");
         }
 
-        // Cargar el cartón del directorio encontrado
+        // Cargar el cartón
         File fCarton = new File(dirJugador, "carton.txt");
         int[][] carton = cargarCarton(fCarton);
         
+        // Obtener los números que han salido para tachar los que correspondan
+        Set<Integer> numerosSalidos = cargarNumerosSalidosSet();
+
         System.out.println("\n=== TU CARTÓN DE BINGO (3x9) ===");
-        imprimirCarton(carton);
+        imprimirCarton(carton, numerosSalidos);
 
         System.out.println("\n1. Ver números que han salido");
         System.out.println("2. Responder Pregunta de Sostenibilidad (para cantar)");
@@ -69,7 +71,6 @@ public class ClienteBingo {
         }
     }
 
-    // Método auxiliar para buscar si el nombre ya se registró en alguna carpeta anterior
     private static File buscarCarpetaPorNombre(File dirUsuarios, String nombreBuscado) {
         if (!dirUsuarios.exists() || !dirUsuarios.isDirectory()) {
             return null;
@@ -79,18 +80,9 @@ public class ClienteBingo {
         if (carpetas == null) return null;
 
         for (File carpeta : carpetas) {
-            // Buscar archivos que empiecen por "numero-" dentro de cada subcarpeta
-            File[] ficherosId = carpeta.listFiles((dir, name) -> name.startsWith("numero-"));
-            if (ficherosId != null && ficherosId.length > 0) {
-                try (BufferedReader br = new BufferedReader(new FileReader(ficherosId[0]))) {
-                    br.readLine(); // Saltar la primera línea (el UID)
-                    String nombreEnArchivo = br.readLine(); // Segunda línea (el nombre)
-                    if (nombreEnArchivo != null && nombreEnArchivo.trim().equalsIgnoreCase(nombreBuscado)) {
-                        return carpeta; // ¡Encontrado! Devuelve la carpeta de este usuario
-                    }
-                } catch (IOException e) {
-                    // Ignorar errores de lectura puntuales y seguir buscando
-                }
+            // El nombre de la carpeta empieza por el nombre del usuario seguido de un guion
+            if (carpeta.getName().toLowerCase().startsWith(nombreBuscado.toLowerCase() + "-")) {
+                return carpeta;
             }
         }
         return null;
@@ -113,13 +105,36 @@ public class ClienteBingo {
         return carton;
     }
 
-    private static void imprimirCarton(int[][] carton) {
+    private static Set<Integer> cargarNumerosSalidosSet() {
+        Set<Integer> salidos = new HashSet<>();
+        File fPartida = new File(Config.RUTA_COMPARTIDA, "partida.txt");
+        if (!fPartida.exists()) return salidos;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(fPartida))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                if (!linea.trim().isEmpty()) {
+                    salidos.add(Integer.parseInt(linea.trim()));
+                }
+            }
+        } catch (IOException e) {
+            // Si hay error leyendo, se devuelve vacío
+        }
+        return salidos;
+    }
+
+    private static void imprimirCarton(int[][] carton, Set<Integer> numerosSalidos) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 9; j++) {
                 if (carton[i][j] == -1) {
-                    System.out.print("[  X  ]\t");
+                    System.out.print("[  0  ]\t"); // Sustituido X por 0
                 } else {
-                    System.out.printf("[%2d  ]\t", carton[i][j]);
+                    int num = carton[i][j];
+                    if (numerosSalidos.contains(num)) {
+                        System.out.printf("[-%2d ]\t", num); // Si ha salido, guion por delante
+                    } else {
+                        System.out.printf("[%2d  ]\t", num);
+                    }
                 }
             }
             System.out.println();

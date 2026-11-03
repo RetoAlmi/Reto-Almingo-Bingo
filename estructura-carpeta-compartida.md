@@ -5,10 +5,7 @@ BingoCompartido/
 ├── preguntas/
 │   ├── 1/
 │   │   ├── pregunta.txt   (Línea 1: ¿Texto?, Línea 2: a)
-│   │   ├── a.txt          (Respuesta A)
-│   │   ├── b.txt          (Respuesta B)
-│   │   ├── c.txt          (Respuesta C)
-│   │   └── d.txt          (Respuesta D)
+│   │   ├── opciones.txt   (Línea 1: Respuesta 1, Línea 2... hasta la respuesta 4)
 │   └── 2/ ...
 ├── partida.txt            (Contiene los números que van saliendo en el bombo)
 └── usuarios/

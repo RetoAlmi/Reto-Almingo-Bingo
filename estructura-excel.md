@@ -1,8 +1,5 @@
 colmunas:
 - id
-- tipo (bola/validacion)(las de validacion es una extra para cuando se canta bingo)
-- categoria
-- dificultad
 - pregunta
 - opcion_a
 - opcion_b
