@@ -74,7 +74,7 @@ public class ClienteBingo {
                 int valor = carton[i][j];
                 
                 if (valor == 0) {
-                    System.out.print("[  0  ]\t");
+                    System.out.print("[0]\t");
                 } else {
                     boolean haSalido = false;
                     for (int k = 0; k < contadorSalidos; k++) {
