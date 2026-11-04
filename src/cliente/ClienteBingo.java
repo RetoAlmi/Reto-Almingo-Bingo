@@ -1,187 +1,141 @@
 package cliente;
 
 import comun.Config;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.PrintWriter;
+import java.util.Scanner;
+import java.io.FileNotFoundException;
+import java.util.Random;
 
 public class ClienteBingo {
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        Scanner scTeclado = new Scanner(System.in);
         
         System.out.println("=== CLIENTE DEL BINGO ALMINGO ===");
         System.out.print("Introduce tu nombre: ");
-        String nombreUsuario = scanner.nextLine().trim();
-
-        File dirUsuarios = new File(Config.RUTA_COMPARTIDA + "\\usuarios");
-        if (!dirUsuarios.exists()) {
-            dirUsuarios.mkdirs();
-        }
-
-        // Generar siempre un nuevo UID único para este acceso
-        String uid = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        String nombreCarpeta = nombreUsuario + "-" + uid;
-        File dirJugador = new File(dirUsuarios, nombreCarpeta);
+        String nombre = scTeclado.next();
+        
+        // Generar un UID único para la sesión del usuario
+        long uid = System.currentTimeMillis();
+        String nombreCarpeta = nombre + "-" + uid;
+        
+        // Ruta de la carpeta de este usuario en la red compartida
+        File dirJugador = new File(Config.RUTA_COMPARTIDA + "\\usuarios\\" + nombreCarpeta);
         dirJugador.mkdirs();
-
-        // 1. Guardar archivo numero-{nombre-uid}.txt
-        File fId = new File(dirJugador, "numero-" + nombreCarpeta + ".txt");
-        try (PrintWriter pw = new PrintWriter(new FileWriter(fId))) {
-            pw.println(nombreCarpeta);
-            pw.println(nombreUsuario);
-        } catch (IOException e) {
-            System.err.println("Error al guardar el identificador: " + e.getMessage());
+        
+        // 1. Guardar el archivo de identificación numero-{nombre-uid}.txt
+        try {
+            PrintWriter pwId = new PrintWriter(new File(dirJugador, "numero-" + nombreCarpeta + ".txt"));
+            pwId.println(nombreCarpeta);
+            pwId.println(nombre);
+            pwId.close(); // Cerrar fichero según la teoría
+        } catch (FileNotFoundException e) {
+            System.out.println("Error al guardar el identificador.");
         }
-
-        // 2. Generar y guardar un nuevo cartón 3x9 exclusivo para esta sesión
-        int[][] carton = servidor.GeneradorCarton.generarCarton3x9();
-        File fCarton = new File(dirJugador, "carton.txt");
-        try (PrintWriter pw = new PrintWriter(new FileWriter(fCarton))) {
+        
+        // 2. El cliente genera su propio cartón 3x9 (5 números por fila, 12 ceros)
+        int[][] carton = generarCartonCliente();
+        
+        // 3. Guardar el cartón en carton.txt para que el servidor lo detecte
+        try {
+            PrintWriter pwCarton = new PrintWriter(new File(dirJugador, "carton.txt"));
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 9; j++) {
-                    pw.println(carton[i][j]);
+                    pwCarton.println(carton[i][j]);
                 }
             }
-        } catch (IOException e) {
-            System.err.println("Error al guardar el cartón: " + e.getMessage());
+            pwCarton.close(); // Cerrar fichero
+            System.out.println("\n[INFO] ¡Cartón generado y guardado en la red con éxito!");
+            System.out.println("-> Carpeta asignada: " + nombreCarpeta);
+        } catch (FileNotFoundException e) {
+            System.out.println("Error al guardar el cartón.");
         }
         
-        System.out.println("\n[INFO] ¡Nueva sesión creada con éxito!");
-        System.out.println("-> Carpeta asignada: " + nombreCarpeta);
-
-        // Cargar el cartón recién creado
-        int[][] cartonCargado = cargarCarton(fCarton);
+        // Leer los números que han salido en partida.txt para comprobar aciertos
+        int[] salidos = new int[100];
+        int contadorSalidos = 0;
         
-        // Obtener los números que han salido para tachar los que correspondan
-        Set<Integer> numerosSalidos = cargarNumerosSalidosSet();
-
+        try {
+            Scanner scPartida = new Scanner(new File(Config.RUTA_COMPARTIDA + "\\partida.txt"));
+            while (scPartida.hasNext()) { // Lectura secuencial con hasNext
+                salidos[contadorSalidos] = scPartida.nextInt();
+                contadorSalidos++;
+            }
+            scPartida.close();
+        } catch (FileNotFoundException e) {
+            // Si partida.txt no existe todavía, continúa con el array vacío
+        }
+        
+        // Imprimir el cartón 3x9 por pantalla aplicando el formato de 0 y guiones (-)
         System.out.println("\n=== TU CARTÓN DE BINGO (3x9) ===");
-        imprimirCarton(cartonCargado, numerosSalidos);
-
-        System.out.println("\n1. Ver números que han salido");
-        System.out.println("2. Responder Pregunta de Sostenibilidad (para cantar)");
-        System.out.print("Selecciona opción: ");
-        int opt = scanner.nextInt();
-
-        if (opt == 1) {
-            mostrarNumerosSalidos();
-        } else if (opt == 2) {
-            hacerPreguntaSostenibilidad(scanner);
-        }
-    }
-
-    private static int[][] cargarCarton(File fCarton) {
-        int[][] carton = new int[3][9];
-        try (BufferedReader br = new BufferedReader(new FileReader(fCarton))) {
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 9; j++) {
-                    String linea = br.readLine();
-                    if (linea != null) {
-                        carton[i][j] = Integer.parseInt(linea.trim());
-                    }
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Error al cargar el cartón: " + e.getMessage());
-        }
-        return carton;
-    }
-
-    private static Set<Integer> cargarNumerosSalidosSet() {
-        Set<Integer> salidos = new HashSet<>();
-        File fPartida = new File(Config.RUTA_COMPARTIDA, "partida.txt");
-        if (!fPartida.exists()) return salidos;
-
-        try (BufferedReader br = new BufferedReader(new FileReader(fPartida))) {
-            String linea;
-            while ((linea = br.readLine()) != null) {
-                if (!linea.trim().isEmpty()) {
-                    salidos.add(Integer.parseInt(linea.trim()));
-                }
-            }
-        } catch (IOException e) {
-            // Ignorar errores de lectura puntuales
-        }
-        return salidos;
-    }
-
-    private static void imprimirCarton(int[][] carton, Set<Integer> numerosSalidos) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 9; j++) {
-                if (carton[i][j] == -1) {
-                    System.out.print("[  0  ]\t"); // Hueco vacío representado como 0
+                int valor = carton[i][j];
+                
+                if (valor == 0) {
+                    System.out.print("[  0  ]\t");
                 } else {
-                    int num = carton[i][j];
-                    if (numerosSalidos.contains(num)) {
-                        System.out.printf("[-%2d ]\t", num); // Si ha salido, guion por delante
+                    boolean haSalido = false;
+                    for (int k = 0; k < contadorSalidos; k++) {
+                        if (salidos[k] == valor) {
+                            haSalido = true;
+                            break;
+                        }
+                    }
+                    
+                    if (haSalido) {
+                        System.out.print("[-" + valor + "]\t");
                     } else {
-                        System.out.printf("[%2d  ]\t", num);
+                        System.out.print("[" + valor + "]\t");
                     }
                 }
             }
             System.out.println();
         }
+        
+        scTeclado.close();
     }
 
-    private static void mostrarNumerosSalidos() {
-        File fPartida = new File(Config.RUTA_COMPARTIDA, "partida.txt");
-        if (!fPartida.exists()) {
-            System.out.println("Aún no ha comenzado la partida.");
-            return;
-        }
-
-        System.out.println("\n--- Números extraídos hasta el momento ---");
-        try (BufferedReader br = new BufferedReader(new FileReader(fPartida))) {
-            String linea;
-            while ((linea = br.readLine()) != null) {
-                System.out.print(linea + " ");
+    // Método auxiliar para que el cliente genere el cartón aleatorio
+    private static int[][] generarCartonCliente() {
+        int[][] carton = new int[3][9];
+        Random rnd = new Random();
+        
+        // Inicializar con 0 (12 huecos vacíos en total, 4 por fila)
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 9; j++) {
+                carton[i][j] = 0;
             }
-            System.out.println();
-        } catch (IOException e) {
-            System.err.println("Error leyendo números salidos: " + e.getMessage());
         }
-    }
-
-    private static void hacerPreguntaSostenibilidad(Scanner scanner) {
-        int numPregunta = 1; 
-        File dirPregunta = new File(Config.RUTA_COMPARTIDA + "\\preguntas\\" + numPregunta);
-        File fPregunta = new File(dirPregunta, "pregunta.txt");
-
-        if (!fPregunta.exists()) {
-            System.out.println("No se encontró la pregunta número " + numPregunta);
-            return;
-        }
-
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(fPregunta));
-            String enunciado = br.readLine();
-            String respuestaCorrecta = br.readLine().trim().toLowerCase();
-            br.close();
-
-            System.out.println("\nPREGUNTA DE SOSTENIBILIDAD:");
-            System.out.println(enunciado);
-
-            String[] opciones = {"a", "b", "c", "d"};
-            for (String op : opciones) {
-                File fOp = new File(dirPregunta, op + ".txt");
-                if (fOp.exists()) {
-                    BufferedReader brOp = new BufferedReader(new FileReader(fOp));
-                    System.out.println(op.toUpperCase() + ") " + brOp.readLine());
-                    brOp.close();
+        
+        // Rellenar cada fila para que tenga exactamente 5 números
+        for (int i = 0; i < 3; i++) {
+            int numerosColocados = 0;
+            while (numerosColocados < 5) {
+                int j = rnd.nextInt(9);
+                
+                if (carton[i][j] == 0) {
+                    int min = (j == 0) ? 1 : j * 10;
+                    int max = (j == 8) ? 90 : (j * 10) + 9;
+                    
+                    int num = min + rnd.nextInt((max - min) + 1);
+                    
+                    boolean repetido = false;
+                    for (int f = 0; f < 3; f++) {
+                        if (carton[f][j] == num) {
+                            repetido = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!repetido) {
+                        carton[i][j] = num;
+                        numerosColocados++;
+                    }
                 }
             }
-
-            System.out.print("\nTu respuesta (a/b/c/d): ");
-            String resUsuario = scanner.next().trim().toLowerCase();
-
-            if (resUsuario.equals(respuestaCorrecta)) {
-                System.out.println("¡Correcto! Respuesta validada.");
-            } else {
-                System.out.println("Incorrecto. La respuesta adecuada era la " + respuestaCorrecta.toUpperCase());
-            }
-
-        } catch (IOException e) {
-            System.err.println("Error al procesar la pregunta: " + e.getMessage());
         }
+        return carton;
     }
 }

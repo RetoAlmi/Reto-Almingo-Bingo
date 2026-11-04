@@ -1,92 +1,157 @@
 package servidor;
 
-import java.io.*;
-import java.util.*;
-
 import comun.Config;
+import java.io.File;
+import java.io.PrintWriter;
+import java.util.Scanner;
+import java.io.FileNotFoundException;
 
 public class ServidorBingo {
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        File directorioBase = new File(Config.RUTA_COMPARTIDA);
+        Scanner scTeclado = new Scanner(System.in);
         
-        if (!directorioBase.exists()) {
-            directorioBase.mkdirs();
-        }
-
         System.out.println("=== SERVIDOR DEL BINGO ALMINGO ===");
-        System.out.println("1. Registrar Nuevo Jugador (Genera UID Automático)");
-        System.out.println("2. Iniciar Bombo de Extracción");
+        System.out.println("1. Inicializar partida.txt");
+        System.out.println("2. Registrar bola sacada del bombo");
+        System.out.println("3. Detectar y listar cartones de los clientes");
+        System.out.println("4. Ver cuántos usuarios hay registrados");
+        System.out.println("5. Vaciar (borrar) todos los usuarios");
         System.out.print("Selecciona una opción: ");
-        int opcion = scanner.nextInt();
-
+        int opcion = scTeclado.nextInt();
+        
         if (opcion == 1) {
-            registrarJugador(scanner);
+            try {
+                PrintWriter pw = new PrintWriter(new File(Config.RUTA_COMPARTIDA + "\\partida.txt"));
+                pw.print("");
+                pw.close(); // Cerrar fichero según la teoría
+                System.out.println("\n[INFO] ¡Partida inicializada!");
+            } catch (FileNotFoundException e) {
+                System.out.println("Error al inicializar la partida.");
+            }
+            
         } else if (opcion == 2) {
-            iniciarBombo(scanner);
-        }
-    }
-
-    private static void registrarJugador(Scanner scanner) {
-        scanner.nextLine(); // Limpiar buffer
-        System.out.print("Introduce el Nombre del usuario: ");
-        String nombre = scanner.nextLine();
-
-        // Generar un UID único basado en la fecha actual en milisegundos o un UUID corto
-        String uid = "USER-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-
-        File dirUsuario = new File(Config.RUTA_COMPARTIDA + "\\usuarios\\" + uid);
-        dirUsuario.mkdirs();
-
-        // 1. Crear archivo numero-{uid}.txt con el UID y el nombre
-        File fId = new File(dirUsuario, "numero-" + uid + ".txt");
-        try (PrintWriter pw = new PrintWriter(new FileWriter(fId))) {
-            pw.println(uid);
-            pw.println(nombre);
-        } catch (IOException e) {
-            System.err.println("Error guardando datos de usuario: " + e.getMessage());
-        }
-
-        // 2. Crear archivo carton.txt (27 líneas)
-        int[][] carton = GeneradorCarton.generarCarton3x9();
-        File fCarton = new File(dirUsuario, "carton.txt");
-        try (PrintWriter pw = new PrintWriter(new FileWriter(fCarton))) {
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 9; j++) {
-                    pw.println(carton[i][j]);
+            // Registrar bola (manteniendo la lógica del bombo)
+            System.out.print("Introduce el número de la bola que ha salido (1-90): ");
+            int bola = scTeclado.nextInt();
+            
+            int[] salidos = new int[100];
+            int totalSalidos = 0;
+            
+            File fPartida = new File(Config.RUTA_COMPARTIDA + "\\partida.txt");
+            if (fPartida.exists()) {
+                try {
+                    Scanner scLectura = new Scanner(fPartida);
+                    while (scLectura.hasNext()) {
+                        salidos[totalSalidos] = scLectura.nextInt();
+                        totalSalidos++;
+                    }
+                    scLectura.close();
+                } catch (FileNotFoundException e) {
+                    // Ignorar si no existe
                 }
             }
-            System.out.println("\n¡Jugador registrado con éxito!");
-            System.out.println("-> Nombre: " + nombre);
-            System.out.println("-> UID Asignado: " + uid);
-            System.out.println("-> Carpeta creada en: " + dirUsuario.getAbsolutePath());
-        } catch (IOException e) {
-            System.err.println("Error guardando el cartón: " + e.getMessage());
-        }
-    }
-
-    private static void iniciarBombo(Scanner scanner) {
-        List<Integer> bombo = new ArrayList<>();
-        for (int i = 1; i <= 90; i++) bombo.add(i);
-        Collections.shuffle(bombo);
-
-        File fPartida = new File(Config.RUTA_COMPARTIDA, "partida.txt");
-
-        System.out.println("\n--- COMIENZA EL JUEGO ---");
-        for (int bola : bombo) {
-            System.out.println("\nPulsa ENTER para sacar la siguiente bola...");
-            scanner.nextLine();
-            scanner.nextLine(); // Doble enter por seguridad al limpiar buffer
             
-            System.out.println("¡Ha salido el número: " + bola + "!");
+            salidos[totalSalidos] = bola;
+            totalSalidos++;
             
-            // Escribir bola sacada en partida.txt
-            try (PrintWriter pw = new PrintWriter(new FileWriter(fPartida, true))) {
-                pw.println(bola);
-            } catch (IOException e) {
-                System.err.println("Error al actualizar partida.txt: " + e.getMessage());
+            try {
+                PrintWriter pwEscritura = new PrintWriter(fPartida);
+                for (int i = 0; i < totalSalidos; i++) {
+                    pwEscritura.println(salidos[i]);
+                }
+                pwEscritura.close();
+                System.out.println("\n[INFO] ¡Bola " + bola + " registrada con éxito!");
+            } catch (FileNotFoundException e) {
+                System.out.println("Error al actualizar la partida.");
             }
+            
+        } else if (opcion == 3) {
+            // Opción para listar cartones
+            File dirUsuarios = new File(Config.RUTA_COMPARTIDA + "\\usuarios");
+            if (!dirUsuarios.exists()) {
+                System.out.println("No hay carpeta de usuarios todavía.");
+            } else {
+                File[] listaCarpetas = dirUsuarios.listFiles();
+                if (listaCarpetas != null) {
+                    System.out.println("\n--- JUGADORES Y CARTONES DETECTADOS ---");
+                    for (int i = 0; i < listaCarpetas.length; i++) {
+                        if (listaCarpetas[i].isDirectory()) {
+                            String nombreCarpeta = listaCarpetas[i].getName();
+                            System.out.println("\nJugador/Sesión: " + nombreCarpeta);
+                            
+                            File fCarton = new File(listaCarpetas[i], "carton.txt");
+                            if (fCarton.exists()) {
+                                System.out.println("Cartón detectado en la red:");
+                                try {
+                                    Scanner scCarton = new Scanner(fCarton);
+                                    for (int f = 0; f < 3; f++) {
+                                        for (int c = 0; c < 9; c++) {
+                                            if (scCarton.hasNextInt()) {
+                                                System.out.print("[" + scCarton.nextInt() + "]\t");
+                                            }
+                                        }
+                                        System.out.println();
+                                    }
+                                    scCarton.close();
+                                } catch (FileNotFoundException e) {
+                                    System.out.println("Error al leer el cartón.");
+                                }
+                            } else {
+                                System.out.println("Este usuario aún no ha generado su cartón.");
+                            }
+                        }
+                    }
+                }
+            }
+            
+        } else if (opcion == 4) {
+            // Opción para ver cuántos usuarios hay registrados
+            File dirUsuarios = new File(Config.RUTA_COMPARTIDA + "\\usuarios");
+            int contadorUsuarios = 0;
+            
+            if (dirUsuarios.exists() && dirUsuarios.isDirectory()) {
+                File[] listaCarpetas = dirUsuarios.listFiles();
+                if (listaCarpetas != null) {
+                    for (int i = 0; i < listaCarpetas.length; i++) {
+                        if (listaCarpetas[i].isDirectory()) {
+                            contadorUsuarios++;
+                        }
+                    }
+                }
+            }
+            System.out.println("\n[INFO] Número total de usuarios conectados/registrados: " + contadorUsuarios);
+            
+        } else if (opcion == 5) {
+            // Opción para vaciar (borrar) todos los usuarios y sus ficheros
+            File dirUsuarios = new File(Config.RUTA_COMPARTIDA + "\\usuarios");
+            
+            if (dirUsuarios.exists() && dirUsuarios.isDirectory()) {
+                File[] listaCarpetas = dirUsuarios.listFiles();
+                if (listaCarpetas != null) {
+                    for (int i = 0; i < listaCarpetas.length; i++) {
+                        if (listaCarpetas[i].isDirectory()) {
+                            // Borrar primero los archivos internos de cada subcarpeta (carton.txt, numero-xxx.txt)
+                            File[] ficherosInternos = listaCarpetas[i].listFiles();
+                            if (ficherosInternos != null) {
+                                for (int j = 0; j < ficherosInternos.length; j++) {
+                                    ficherosInternos[j].delete();
+                                }
+                            }
+                            // Borrar la carpeta del usuario
+                            listaCarpetas[i].delete();
+                        }
+                    }
+                }
+                System.out.println("\n[INFO] ¡Se han borrado todos los usuarios y sus carpetas de la red con éxito!");
+            } else {
+                System.out.println("\n[INFO] No hay carpeta de usuarios que vaciar.");
+            }
+            
+        } else {
+            System.out.println("Opción no válida.");
         }
+        
+        scTeclado.close();
     }
 }
