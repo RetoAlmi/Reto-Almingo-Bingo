@@ -2,13 +2,13 @@ package preguntas;
 
 public class DatosPregunta {
 
-    public int id;
-    public String textoPregunta;
-    public String opA;
-    public String opB;
-    public String opC;
-    public String opD;
-    public String correcta;
+    int id;
+    String textoPregunta;
+    String opA;
+    String opB;
+    String opC;
+    String opD;
+    String correcta;
 
     public DatosPregunta(int id, String textoPregunta, String opA,
             String opB, String opC, String opD, String correcta) {

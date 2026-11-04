@@ -1,0 +1,25 @@
+1$¿Cuál es la definición clásica de desarrollo sostenible?$Proteger la naturaleza sin tocar ningún recurso$Reducir la población mundial$Crecer económicamente sin ningún límite$Satisfacer las necesidades del presente sin comprometer las de las generaciones futuras$D
+2$¿Cuáles son los tres pilares del desarrollo sostenible?$Ambiental, social y económico$Tecnológico, legal y deportivo$Industrial, comercial y financiero$Político, militar y cultural$A
+3$¿En qué año se publicó el Informe Brundtland 'Nuestro futuro común'?$1987$1972$1997$2015$A
+4$¿Qué mide la huella ecológica?$El número de árboles de una ciudad$Los kilómetros que recorre un producto$La superficie de tierra y mar necesaria para producir lo que consumimos y absorber nuestros residuos$El peso de la basura de una persona$C
+5$¿Qué expresa la huella de carbono?$El consumo de agua de una persona$El número de coches de una ciudad$La cantidad de carbón que tiene una mina$Las emisiones de gases de efecto invernadero asociadas a una actividad o producto$D
+6$¿En qué consiste la economía circular?$En comprar productos nuevos cada año$En fabricar, usar y tirar$En mantener productos y materiales en uso el mayor tiempo posible, reduciendo residuos$En trasladar la producción a otros países$C
+7$¿Cuáles son las 3R de la sostenibilidad?$Recortar, reponer y reformar$Reparar, regalar y rechazar$Reducir, reutilizar y reciclar$Reciclar, recoger y revender$C
+8$¿Cuál de estas fuentes de energía es renovable?$Solar$Gas natural$Carbón$Petróleo$A
+9$¿Qué significa que un material sea biodegradable?$Que no se puede romper$Que puede descomponerse por la acción de organismos vivos$Que se puede quemar sin humo$Que flota en el agua$B
+10$¿Qué es el 'greenwashing'?$Un certificado oficial de sostenibilidad$Lavar la ropa con productos ecológicos$Dar una imagen engañosa de ser más sostenible de lo que realmente se es$Una técnica para limpiar residuos$C
+11$¿Qué es la obsolescencia programada?$Retirar un producto del mercado por ley$Reducir deliberadamente la vida útil de un producto para que se compre otro$Actualizar un producto con nuevas funciones$Reciclar un producto al final de su vida$B
+12$¿Cuál es el principal gas de efecto invernadero emitido por la actividad humana?$Helio (He)$Oxígeno (O₂)$Dióxido de carbono (CO₂)$Nitrógeno (N₂)$C
+13$¿Qué significan las siglas RSC?$Responsabilidad Social Corporativa$Registro de Sociedades y Comercio$Reducción de Sustancias Contaminantes$Recursos Sostenibles Certificados$A
+14$¿Qué es el ciclo de vida de un producto?$El periodo en que está a la venta$Solo la fase de fabricación$El tiempo que dura la garantía$Todas sus etapas, desde la extracción de materias primas hasta su fin de vida$D
+15$¿Qué es la resiliencia en el ámbito de la sostenibilidad?$El ahorro de energía en un edificio$La resistencia de un material al fuego$La capacidad de producir más gastando menos$La capacidad de adaptarse y recuperarse ante crisis o cambios$D
+16$¿Qué significan las siglas ASG (ESG en inglés)?$Ambientales, Sociales y de Gobernanza$Agua, Suelo y Gases$Acción, Solidaridad y Garantía$Administración, Salarios y Gestión$A
+17$¿Cuál de estos aspectos es ambiental (A)?$Las emisiones de CO₂ de la empresa$La igualdad salarial$La composición del consejo de administración$La satisfacción de los clientes$A
+18$¿Cuál de estos aspectos es social (S)?$El consumo de agua$El uso de energía renovable$La gestión de residuos$Las condiciones laborales y la igualdad en la plantilla$D
+19$¿Cuál de estos aspectos es de gobernanza (G)?$La huella de carbono$La diversidad de la plantilla$La transparencia y la lucha contra la corrupción$La contaminación del aire$C
+20$¿Para qué usan los inversores los criterios ASG?$Para fijar el precio de los productos$Para evaluar el riesgo y el impacto de una empresa más allá de lo financiero$Para calcular los impuestos de la empresa$Para elegir el color de la marca$B
+21$¿Qué es un informe de sostenibilidad?$Un informe de ventas trimestral$Un manual de uso de un producto$Un documento donde la empresa comunica su impacto ambiental, social y de gobernanza$Una factura de energía$C
+22$¿Qué plantea el principio de doble materialidad?$Analizar el impacto de la empresa en su entorno y también el del entorno en la empresa$Usar dos materiales distintos en cada producto$Publicar dos informes financieros al año$Duplicar el presupuesto ambiental$A
+23$¿Qué es GRI (Global Reporting Initiative)?$Una organización que crea estándares para los informes de sostenibilidad$Un tipo de energía renovable$Un buscador de empleo verde$Un impuesto ambiental$A
+24$¿Qué es la inversión socialmente responsable?$Invertir teniendo en cuenta criterios ambientales y sociales además del beneficio$Invertir solo en el sector energético$Donar dinero a una ONG$Invertir sin buscar rentabilidad$A
+25$¿Qué es una empresa B Corp?$Una empresa de más de mil trabajadores$Una empresa certificada por cumplir altos estándares sociales y ambientales$Una empresa del sector de las bebidas$Una empresa pública$B

@@ -8,71 +8,88 @@ import java.util.Scanner;
 
 public class JuegoPreguntas {
 
-	public static void main(String[] args) {
-
-		ArrayList<DatosPregunta> listaPreguntas = new ArrayList<>();
-
-
-		try {
-
-			BufferedReader br = new BufferedReader(new FileReader("preguntas.csv"));
-
-			String linea;
-
-			br.readLine();
-
-			linea = br.readLine();
-
-			while (linea != null) {
-
-				String[] partes = linea.split(",");
-
-				int id = Integer.parseInt(partes[0]);
-				String pregunta = partes[1];
-				String opA = partes[2];
-				String opB = partes[3];
-				String opC = partes[4];
-				String opD = partes[5];
-				String correcta = partes[6];
-
-				DatosPregunta p = new DatosPregunta(id, pregunta, opA, opB, opC, opD, correcta);
-
-				listaPreguntas.add(p);
-
-				linea = br.readLine();
-			}
-			br.close();
-
-		} catch (IOException e) {
-			System.out.println("Error al leer el archivo");
-		}
-
-	}
+    private ArrayList<DatosPregunta> listaPreguntas = new ArrayList<>();
+    private ArrayList<Integer> idsUsados = new ArrayList<>();
 
 
-	public static void lanzarPregunta(ArrayList<DatosPregunta> lista) {
+    public JuegoPreguntas() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("preguntas.txt"));
 
-		int numero = (int) (Math.random() * lista.size());
+            String linea = br.readLine();
 
-		DatosPregunta p = lista.get(numero);
+            while (linea != null) {
+                String[] partes = linea.split("\\$");
 
-		System.out.println(p.textoPregunta);
-		System.out.println("A) " + p.opA);
-		System.out.println("B) " + p.opB);
-		System.out.println("C) " + p.opC);
-		System.out.println("D) " + p.opD);
+                int id = Integer.parseInt(partes[0]);
+                String pregunta = partes[1];
+                String opA = partes[2];
+                String opB = partes[3];
+                String opC = partes[4];
+                String opD = partes[5];
+                String correcta = partes[6];
 
-		Scanner sc = new Scanner(System.in);
+                DatosPregunta p = new DatosPregunta(id, pregunta, opA, opB, opC, opD, correcta);
+                listaPreguntas.add(p);
 
-		System.out.println("Tu respuesta:");
-		String respuesta = sc.nextLine();
+                linea = br.readLine();
+            }
+            br.close();
 
-		if (respuesta.equalsIgnoreCase(p.correcta)) {
-			System.out.println("¡Correcto!");
-		} else {
-			System.out.println("Incorrecto");
-			System.out.println("La correcta era: " + p.correcta);
-		}
-	}
+        } catch (IOException e) {
+            System.out.println("Error al leer el archivo");
+        }
+    }
 
+ 
+    public DatosPregunta sacarPregunta() {
+
+    
+        if (idsUsados.size() == listaPreguntas.size()) {
+            idsUsados.clear();
+        }
+
+        DatosPregunta p;
+
+        do {
+            int numero = (int) (Math.random() * listaPreguntas.size());
+            p = listaPreguntas.get(numero);
+        } while (idsUsados.contains(p.getId()));
+
+        idsUsados.add(p.getId());
+        return p;
+    }
+
+
+    public boolean lanzarPregunta(Scanner sc) {
+
+        DatosPregunta p = sacarPregunta();
+
+        System.out.println(p.getTextoPregunta());
+        System.out.println("A) " + p.getOpA());
+        System.out.println("B) " + p.getOpB());
+        System.out.println("C) " + p.getOpC());
+        System.out.println("D) " + p.getOpD());
+
+        System.out.println("Tu respuesta:");
+        String respuesta = sc.nextLine();
+
+        if (respuesta.equalsIgnoreCase(p.getCorrecta())) {
+            System.out.println("¡Correcto!");
+            return true;
+        } else {
+            System.out.println("Incorrecto. La correcta era: " + p.getCorrecta());
+            return false;
+        }
+    }
+    
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+        JuegoPreguntas juego = new JuegoPreguntas();
+
+        juego.lanzarPregunta(sc);
+        juego.lanzarPregunta(sc);
+        juego.lanzarPregunta(sc);
+    }
 }
