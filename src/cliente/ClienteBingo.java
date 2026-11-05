@@ -1,6 +1,5 @@
 package cliente;
 
-import comun.Config;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Scanner;
@@ -8,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.util.Random;
 
 public class ClienteBingo {
+    public static final String RUTA_COMPARTIDA = "\\\\DESKTOP-V7J205P\\Reto-Almingo-Bingo";
 
     public static void main(String[] args) {
         Scanner scTeclado = new Scanner(System.in);
@@ -17,16 +17,19 @@ public class ClienteBingo {
         String nombre = scTeclado.next();
         
         // Generar un UID único para la sesión del usuario
-        long uid = System.currentTimeMillis();
+        int uid = generarUid();
         String nombreCarpeta = nombre + "-" + uid;
+        String rutaCarpeta = RUTA_COMPARTIDA + "\\usuarios\\" + nombreCarpeta;
+        System.out.println("Tu UID: " + uid);
+        System.out.println("Carpeta: " + rutaCarpeta);
         
         // Ruta de la carpeta de este usuario en la red compartida
-        File dirJugador = new File(Config.RUTA_COMPARTIDA + "\\usuarios\\" + nombreCarpeta);
+        File dirJugador = new File(rutaCarpeta);
         dirJugador.mkdirs();
         
         // 1. Guardar el archivo de identificación numero-{nombre-uid}.txt
         try {
-            PrintWriter pwId = new PrintWriter(new File(dirJugador, "numero-" + nombreCarpeta + ".txt"));
+            PrintWriter pwId = new PrintWriter(new File(dirJugador, "id-" + nombreCarpeta + ".txt"));
             pwId.println(nombreCarpeta);
             pwId.println(nombre);
             pwId.close(); // Cerrar fichero según la teoría
@@ -46,7 +49,7 @@ public class ClienteBingo {
                 }
             }
             pwCarton.close(); // Cerrar fichero
-            System.out.println("\n[INFO] ¡Cartón generado y guardado en la red con éxito!");
+            System.out.println("\n[INFORMACION] ¡Cartón generado y guardado en la red con éxito!");
             System.out.println("-> Carpeta asignada: " + nombreCarpeta);
         } catch (FileNotFoundException e) {
             System.out.println("Error al guardar el cartón.");
@@ -57,7 +60,7 @@ public class ClienteBingo {
         int contadorSalidos = 0;
         
         try {
-            Scanner scPartida = new Scanner(new File(Config.RUTA_COMPARTIDA + "\\partida.txt"));
+            Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"));
             while (scPartida.hasNext()) { // Lectura secuencial con hasNext
                 salidos[contadorSalidos] = scPartida.nextInt();
                 contadorSalidos++;
@@ -95,6 +98,15 @@ public class ClienteBingo {
         }
         
         scTeclado.close();
+    }
+    
+    private static int generarUid() {
+    	int uid;
+    	Random rnd = new Random();
+    	
+    	uid = rnd.nextInt(100, 99999);
+    	
+    	return uid;
     }
 
     // Método auxiliar para que el cliente genere el cartón aleatorio

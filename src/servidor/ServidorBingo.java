@@ -1,22 +1,24 @@
 package servidor;
 
-import comun.Config;
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.Random;
 import java.util.Scanner;
 import java.io.FileNotFoundException;
 
 public class ServidorBingo {
+    public static final String RUTA_COMPARTIDA = "\\\\DESKTOP-V7J205P\\Reto-Almingo-Bingo";
 
     public static void main(String[] args) {
         Scanner scTeclado = new Scanner(System.in);
         int opcion = 0;
+        Random rnd = new Random();
         
         // Bucle do...while para que el servidor no se cierre y repita el menú
         do {
             System.out.println("\n=== SERVIDOR DEL BINGO ALMINGO ===");
-            System.out.println("1. Inicializar partida.txt");
-            System.out.println("2. Registrar bola sacada del bombo");
+            System.out.println("1. Inicializar partida");
+            System.out.println("2. Sacar bola del bombo");
             System.out.println("3. Detectar y listar cartones de los clientes");
             System.out.println("4. Ver cuántos usuarios hay registrados");
             System.out.println("5. Vaciar (borrar) todos los usuarios");
@@ -33,28 +35,58 @@ public class ServidorBingo {
             
             if (opcion == 1) {
                 try {
-                    PrintWriter pw = new PrintWriter(new File(Config.RUTA_COMPARTIDA + "\\partida.txt"));
-                    pw.print("");
-                    pw.close(); // Cerrar fichero según la teoría
+                    PrintWriter pwPartida = new PrintWriter(new File(RUTA_COMPARTIDA + "\\partida.txt"));
+                    pwPartida.print("");
+                    pwPartida.close(); // Cerrar fichero según la teoría
+                    PrintWriter pwBolas = new PrintWriter(new File(RUTA_COMPARTIDA + "\\bolas.txt"));
+                    pwBolas.print("");
+                    pwBolas.close();
+                    PrintWriter pwTotalBolas = new PrintWriter(new File(RUTA_COMPARTIDA + "\\totalBolas.txt"));
+                    pwTotalBolas.print("");
+                    pwTotalBolas.close();
                     System.out.println("\n[INFO] ¡Partida inicializada!");
                 } catch (FileNotFoundException e) {
                     System.out.println("Error al inicializar la partida.");
                 }
                 
             } else if (opcion == 2) {
-                System.out.print("Introduce el número de la bola que ha salido (1-90): ");
-                int bola = scTeclado.nextInt();
-                
-                int[] salidos = new int[100];
+            	int bolaNueva;
+            	int bola;
+            	boolean encontrado;
                 int totalSalidos = 0;
+                int totalRestantes = 99;
                 
-                File fPartida = new File(Config.RUTA_COMPARTIDA + "\\partida.txt");
+
+                do {
+                    bolaNueva = rnd.nextInt(1, 100);
+                    encontrado = false;
+
+                    // Abrimos el archivo en cada intento para comprobar si el número existe
+                    try (Scanner lector = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"))) {
+                        while (lector.hasNextInt()) {
+                            int numeroArchivo = lector.nextInt();
+                            if (numeroArchivo == bolaNueva) {
+                                encontrado = true;
+                                break; // Si coincide, salimos del bucle interno de lectura
+                            }
+                        }
+                    } catch (FileNotFoundException e) {
+                        System.out.println("El archivo no se encontró: " + e.getMessage());
+                        break;
+                    }
+
+                } while (encontrado); // Repite si el número fue encontrado en el archivo
+                
+                bola = bolaNueva;
+
+                System.out.println("Número válido generado (no está en el archivo): " + bola);
+                
+                File fPartida = new File(RUTA_COMPARTIDA + "\\partida.txt");
                 if (fPartida.exists()) {
                     try {
                         Scanner scLectura = new Scanner(fPartida);
                         while (scLectura.hasNext()) {
-                            salidos[totalSalidos] = scLectura.nextInt();
-                            totalSalidos++;
+                            bola = scLectura.nextInt();
                         }
                         scLectura.close();
                     } catch (FileNotFoundException e) {
@@ -62,13 +94,31 @@ public class ServidorBingo {
                     }
                 }
                 
-                salidos[totalSalidos] = bola;
+                File fTotalBolas = new File(RUTA_COMPARTIDA + "\\totalBolas.txt");
+                if (fTotalBolas.exists()) {
+                    try {
+                        Scanner scLectura = new Scanner(fTotalBolas);
+                        while (scLectura.hasNext()) {
+                            totalSalidos++;
+                            totalRestantes--;
+                            totalSalidos = scLectura.nextInt();
+                            totalRestantes = scLectura.nextInt();
+                        }
+                        System.out.println("Bolas sacadas: " + totalSalidos);
+                        System.out.println("Bolas restantes: " + totalRestantes);
+                        scLectura.close();
+                    } catch (FileNotFoundException e) {
+                        // Ignorar si no existe
+                    }
+                }
+                
                 totalSalidos++;
+                totalRestantes--;
                 
                 try {
                     PrintWriter pwEscritura = new PrintWriter(fPartida);
                     for (int i = 0; i < totalSalidos; i++) {
-                        pwEscritura.println(salidos[i]);
+                        pwEscritura.println(bola);
                     }
                     pwEscritura.close();
                     System.out.println("\n[INFO] ¡Bola " + bola + " registrada con éxito!");
@@ -77,7 +127,7 @@ public class ServidorBingo {
                 }
                 
             } else if (opcion == 3) {
-                File dirUsuarios = new File(Config.RUTA_COMPARTIDA + "\\usuarios");
+                File dirUsuarios = new File(RUTA_COMPARTIDA + "\\usuarios");
                 if (!dirUsuarios.exists()) {
                     System.out.println("No hay carpeta de usuarios todavía.");
                 } else {
@@ -115,7 +165,7 @@ public class ServidorBingo {
                 }
                 
             } else if (opcion == 4) {
-                File dirUsuarios = new File(Config.RUTA_COMPARTIDA + "\\usuarios");
+                File dirUsuarios = new File(RUTA_COMPARTIDA + "\\usuarios");
                 int contadorUsuarios = 0;
                 
                 if (dirUsuarios.exists() && dirUsuarios.isDirectory()) {
@@ -131,7 +181,7 @@ public class ServidorBingo {
                 System.out.println("\n[INFO] Número total de usuarios conectados/registrados: " + contadorUsuarios);
                 
             } else if (opcion == 5) {
-                File dirUsuarios = new File(Config.RUTA_COMPARTIDA + "\\usuarios");
+                File dirUsuarios = new File(RUTA_COMPARTIDA + "\\usuarios");
                 
                 if (dirUsuarios.exists() && dirUsuarios.isDirectory()) {
                     File[] listaCarpetas = dirUsuarios.listFiles();
