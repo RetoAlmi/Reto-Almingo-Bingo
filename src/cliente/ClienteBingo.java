@@ -7,147 +7,242 @@ import java.io.FileNotFoundException;
 import java.util.Random;
 
 public class ClienteBingo {
-    public static final String RUTA_COMPARTIDA = "\\\\DESKTOP-V7J205P\\Reto-Almingo-Bingo";
+	public static final String RUTA_COMPARTIDA = "\\\\DESKTOP-V7J205P\\Reto-Almingo-Bingo";
+	public static final int PREGUNTAS_CORRECTAS = 0;
+	public static final int PREGUNTAS_FALLIDAS = 0;
 
-    public static void main(String[] args) {
-        Scanner scTeclado = new Scanner(System.in);
-        
-        System.out.println("=== CLIENTE DEL BINGO ALMINGO ===");
-        System.out.print("Introduce tu nombre: ");
-        String nombre = scTeclado.next();
-        
-        // Generar un UID único para la sesión del usuario
-        int uid = generarUid();
-        String nombreCarpeta = nombre + "-" + uid;
-        String rutaCarpeta = RUTA_COMPARTIDA + "\\usuarios\\" + nombreCarpeta;
-        System.out.println("Tu UID: " + uid);
-        System.out.println("Carpeta: " + rutaCarpeta);
-        
-        // Ruta de la carpeta de este usuario en la red compartida
-        File dirJugador = new File(rutaCarpeta);
-        dirJugador.mkdirs();
-        
-        // 1. Guardar el archivo de identificación numero-{nombre-uid}.txt
-        try {
-            PrintWriter pwId = new PrintWriter(new File(dirJugador, "id-" + nombreCarpeta + ".txt"));
-            pwId.println(nombreCarpeta);
-            pwId.println(nombre);
-            pwId.close(); // Cerrar fichero según la teoría
-        } catch (FileNotFoundException e) {
-            System.out.println("Error al guardar el identificador.");
-        }
-        
-        // 2. El cliente genera su propio cartón 3x9 (5 números por fila, 12 ceros)
-        int[][] carton = generarCartonCliente();
-        
-        // 3. Guardar el cartón en carton.txt para que el servidor lo detecte
-        try {
-            PrintWriter pwCarton = new PrintWriter(new File(dirJugador, "carton.txt"));
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 9; j++) {
-                    pwCarton.println(carton[i][j]);
-                }
-            }
-            pwCarton.close(); // Cerrar fichero
-            System.out.println("\n[INFORMACION] ¡Cartón generado y guardado en la red con éxito!");
-            System.out.println("-> Carpeta asignada: " + nombreCarpeta);
-        } catch (FileNotFoundException e) {
-            System.out.println("Error al guardar el cartón.");
-        }
-        
-        // Leer los números que han salido en partida.txt para comprobar aciertos
-        int[] salidos = new int[100];
-        int contadorSalidos = 0;
-        
-        try {
-            Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"));
-            while (scPartida.hasNext()) { // Lectura secuencial con hasNext
-                salidos[contadorSalidos] = scPartida.nextInt();
-                contadorSalidos++;
-            }
-            scPartida.close();
-        } catch (FileNotFoundException e) {
-            // Si partida.txt no existe todavía, continúa con el array vacío
-        }
-        
-        // Imprimir el cartón 3x9 por pantalla aplicando el formato de 0 y guiones (-)
-        System.out.println("\n=== TU CARTÓN DE BINGO (3x9) ===");
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 9; j++) {
-                int valor = carton[i][j];
-                
-                if (valor == 0) {
-                    System.out.print("[ 0 ]\t");
-                } else {
-                    boolean haSalido = false;
-                    for (int k = 0; k < contadorSalidos; k++) {
-                        if (salidos[k] == valor) {
-                            haSalido = true;
-                            break;
-                        }
-                    }
-                    
-                    if (haSalido) {
-                        System.out.print("[-" + valor + "]\t");
-                    } else {
-                        System.out.print("[" + valor + "]\t");
-                    }
-                }
-            }
-            System.out.println();
-        }
-        
-        scTeclado.close();
-    }
-    
-    private static int generarUid() {
-    	int uid;
-    	Random rnd = new Random();
-    	
-    	uid = rnd.nextInt(100, 99999);
-    	
-    	return uid;
-    }
+	public static void main(String[] args) {
+		Scanner scTeclado = new Scanner(System.in);
+		Scanner scNumero = new Scanner(System.in);
+		int numeroIntroducido;
 
-    // Método auxiliar para que el cliente genere el cartón aleatorio
-    private static int[][] generarCartonCliente() {
-        int[][] carton = new int[3][9];
-        Random rnd = new Random();
-        
-        // Inicializar con 0 (12 huecos vacíos en total, 4 por fila)
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 9; j++) {
-                carton[i][j] = 0;
-            }
-        }
-        
-        // Rellenar cada fila para que tenga exactamente 5 números
-        for (int i = 0; i < 3; i++) {
-            int numerosColocados = 0;
-            while (numerosColocados < 5) {
-                int j = rnd.nextInt(9);
-                
-                if (carton[i][j] == 0) {
-                    int min = (j == 0) ? 1 : j * 10;
-                    int max = (j == 8) ? 90 : (j * 10) + 9;
-                    
-                    int num = min + rnd.nextInt((max - min) + 1);
-                    
-                    boolean repetido = false;
-                    for (int f = 0; f < 3; f++) {
-                        if (carton[f][j] == num) {
-                            repetido = true;
-                            break;
-                        }
-                    }
-                    
-                    if (!repetido) {
-                        carton[i][j] = num;
-                        numerosColocados++;
-                    }
-                }
-            }
-        }
-        return carton;
-    }
+		System.out.println("=== CLIENTE DEL BINGO ALMINGO ===");
+		System.out.print("Introduce tu nombre: ");
+		String nombre = scTeclado.next();
+
+		// Generar un UID único para la sesión del usuario
+		int uid = generarUid();
+		String nombreCarpeta = nombre + "-" + uid;
+		String rutaCarpeta = RUTA_COMPARTIDA + "\\usuarios\\" + nombreCarpeta;
+		System.out.println("Tu UID: " + uid);
+		System.out.println("Carpeta: " + rutaCarpeta);
+
+		// Ruta de la carpeta de este usuario en la red compartida
+		File dirJugador = new File(rutaCarpeta);
+		dirJugador.mkdirs();
+
+		// 1. Guardar el archivo de identificación numero-{nombre-uid}.txt
+		try {
+			PrintWriter pwId = new PrintWriter(new File(dirJugador, "id-" + nombreCarpeta + ".txt"));
+			pwId.println(nombreCarpeta);
+			pwId.println(nombre);
+			pwId.close(); // Cerrar fichero según la teoría
+		} catch (FileNotFoundException e) {
+			System.out.println("Error al guardar el identificador.");
+		}
+
+		// 2. El cliente genera su propio cartón 3x9 (5 números por fila, 12 ceros)
+		int[][] carton = generarCartonCliente();
+
+		// 3. Guardar el cartón en carton.txt para que el servidor lo detecte
+		try {
+			PrintWriter pwCarton = new PrintWriter(new File(dirJugador, "carton.txt"));
+			PrintWriter pwCartonComprobar = new PrintWriter(new File(dirJugador, "cartonComprobar.txt"));
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 9; j++) {
+					pwCarton.println(carton[i][j]);
+					pwCartonComprobar.println(carton[i][j]);
+				}
+			}
+			pwCarton.close(); // Cerrar fichero
+			pwCartonComprobar.close();
+			
+			System.out.println("\n[INFORMACION] ¡Cartón generado y guardado en la red con éxito!");
+			System.out.println("-> Carpeta asignada: " + nombreCarpeta);
+		} catch (FileNotFoundException e) {
+			System.out.println("Error al guardar el cartón.");
+		}
+
+		int opcion = 0;
+		do {
+			// Imprimir el cartón 3x9 por pantalla aplicando el formato de 0 y guiones (-)
+			System.out.println("\n=== TU CARTÓN DE BINGO ===");
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 9; j++) {
+					int valor = carton[i][j];
+					System.out.print("[ " + valor + " ]\t");
+				}
+				System.out.println();
+			}
+
+			System.out.println("\n=== MENU ===");
+			System.out.println("1. Comprobar numero");
+			System.out.println("2. Comprobar linea");
+			System.out.println("3. Comprobar bingo");
+			System.out.println("0. Salir");
+			System.out.print("Selecciona una opción: ");
+
+			if (scTeclado.hasNextInt()) {
+				opcion = scTeclado.nextInt();
+			} else {
+				System.out.println("Por favor, introduce un número válido.");
+				scTeclado.next(); // Limpiar entrada incorrecta
+				continue;
+			}
+
+			if (opcion == 1) {
+				// Leer los números que han salido en partida.txt para comprobar aciertos
+				System.out.print("Introduce el numero para comprobar: ");
+				int numero = scNumero.nextInt();
+				comprobarNumero(numero, rutaCarpeta);
+			}
+
+			if (opcion == 2) {
+				// Comprobar linea
+				boolean linea = false;
+				linea = comprobarLinea(rutaCarpeta);
+			}
+
+			if (opcion == 3) {
+				// Comprobar bingo
+				boolean bingo = false;
+				bingo = comprobarBingo(rutaCarpeta);
+			}
+
+			if (opcion == 0) {
+				System.out.println("\nSaliendo de la partida...");
+			} else {
+				System.out.println("\nOpción no válida.");
+			}
+		} while (opcion != 0);
+
+		scTeclado.close();
+		scNumero.close();
+	}
+	
+	private static boolean comprobarLinea(String rutaCarpeta) {
+		boolean linea = false;
+		return linea;
+	}
+	
+	private static boolean comprobarBingo(String rutaCarpeta) {
+		boolean bingo = false;
+		String contiene;
+
+		try {
+			Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"));
+			Scanner scCarton = new Scanner(new File(rutaCarpeta + "\\carton.txt"));
+			Scanner scCartonComprobar = new Scanner(new File(rutaCarpeta + "\\cartonComprobar.txt"));
+			while (scCartonComprobar.hasNextLine()) { // Lectura secuencial con hasNextLine
+				contiene = scCartonComprobar.nextLine();
+				if (contiene.startsWith("-")) {
+					bingo = true;					
+				}
+				if (!contiene.startsWith("-")) {
+					bingo = false;
+				}
+			}
+
+			if (bingo) {
+				// Si hay bingo
+			} else if (!bingo) {
+				// Si no hay bingo
+				System.out.println("[INFORMACION] No puedes hacer bingo, no esta completo");
+			} else {
+				System.out.println("[ERROR] Error desconocido");
+			}
+
+			scPartida.close();
+			scCarton.close();
+			scCartonComprobar.close();
+		} catch (FileNotFoundException e) {
+
+		}
+		
+		return bingo;
+	}
+
+	private static void comprobarNumero(int numero, String rutaCarpeta) {
+		boolean esta = false;
+		int numeroLinea = 0;
+
+		try {
+			Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"));
+			Scanner scCarton = new Scanner(new File(rutaCarpeta + "\\carton.txt"));
+			Scanner scCartonComprobar = new Scanner(new File(rutaCarpeta + "\\cartonComprobar.txt"));
+			
+			PrintWriter pwCarton = new PrintWriter(new File(rutaCarpeta, "\\carton.txt"));
+			PrintWriter pwCartonComprobar = new PrintWriter(new File(rutaCarpeta, "\\cartonComprobar.txt"));
+			
+			while (scPartida.hasNextInt()) { // Lectura secuencial con hasNext
+				numero = scPartida.nextInt();
+				esta = true;
+				numeroLinea++;
+			}
+
+			if (esta) {
+				numero = numero - (2 * numero);
+			}
+			
+
+			pwCarton.println(numeroLinea);
+
+			scPartida.close();
+			scCarton.close();
+			scCartonComprobar.close();
+		} catch (FileNotFoundException e) {
+
+		}
+	}
+
+	private static int generarUid() {
+		int uid;
+		Random rnd = new Random();
+
+		uid = rnd.nextInt(100, 99999);
+
+		return uid;
+	}
+
+	// Método auxiliar para que el cliente genere el cartón aleatorio
+	private static int[][] generarCartonCliente() {
+		int[][] carton = new int[3][9];
+		Random rnd = new Random();
+
+		// Inicializar con 0 (12 huecos vacíos en total, 4 por fila)
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 9; j++) {
+				carton[i][j] = 0;
+			}
+		}
+
+		// Rellenar cada fila para que tenga exactamente 5 números
+		for (int i = 0; i < 3; i++) {
+			int numerosColocados = 0;
+			while (numerosColocados < 5) {
+				int j = rnd.nextInt(9);
+
+				if (carton[i][j] == 0) {
+					int min = 1;
+					int max = 91;
+
+					int num = min + rnd.nextInt(min, max);
+
+					boolean repetido = false;
+					for (int f = 0; f < 3; f++) {
+						if (carton[f][j] == num) {
+							repetido = true;
+							break;
+						}
+					}
+
+					if (!repetido) {
+						carton[i][j] = num;
+						numerosColocados++;
+					}
+				}
+			}
+		}
+		return carton;
+	}
 }
