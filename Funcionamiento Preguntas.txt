@@ -1,0 +1,10 @@
+Para llamar a las preguntas del bingo:
+
+El programa está pensado para lanzar la pregunta llamando a la función: 
+		***	
+			Scanner sc = new Scanner(System.in);
+        	JuegoPreguntas juego = new JuegoPreguntas();    		
+        	juego.lanzarPregunta(sc);
+        ***
+El programa devuelve un booleano, TRUE si es correcta la respuesta del jugador y FALSE si es incorrecta.
+Faltaría añadir la llamada al programa principal y poner un contador en función de la respuesta booleana del programa de preguntas.

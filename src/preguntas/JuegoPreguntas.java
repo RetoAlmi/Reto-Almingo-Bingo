@@ -12,14 +12,14 @@ public class JuegoPreguntas {
     private ArrayList<Integer> idsUsados = new ArrayList<>();
 
 
-    public JuegoPreguntas() {
+    public JuegoPreguntas() { //lee el archivo con las preguntas y las divide en partes, guardando cada opción en una variable diferente para tener las opciones de las preguntas separadas
         try {
             BufferedReader br = new BufferedReader(new FileReader("preguntas.txt"));
 
             String linea = br.readLine();
 
             while (linea != null) {
-                String[] partes = linea.split("\\$");
+                String[] partes = linea.split("\\$"); // coloco la doble barra para evitar un salto de linea por el caracter
 
                 int id = Integer.parseInt(partes[0]);
                 String pregunta = partes[1];
@@ -29,7 +29,7 @@ public class JuegoPreguntas {
                 String opD = partes[5];
                 String correcta = partes[6];
 
-                DatosPregunta p = new DatosPregunta(id, pregunta, opA, opB, opC, opD, correcta);
+                DatosPregunta p = new DatosPregunta(id, pregunta, opA, opB, opC, opD, correcta); //se añaden las variables a un arraylist
                 listaPreguntas.add(p);
 
                 linea = br.readLine();
@@ -42,7 +42,7 @@ public class JuegoPreguntas {
     }
 
  
-    public DatosPregunta sacarPregunta() {
+    public DatosPregunta sacarPregunta() { //baraja las preguntas para no mantener siempre el mismo orden, una vez salida la pregunta se guarda el id en un array para evitar que se repita la prefunta
 
     
         if (idsUsados.size() == listaPreguntas.size()) {
@@ -61,7 +61,7 @@ public class JuegoPreguntas {
     }
 
 
-    public boolean lanzarPregunta(Scanner sc) {
+    public boolean lanzarPregunta(Scanner sc) { //lanza las preguntas, comprueba la respuesta si es correcta y lanza el mensaje. devuelve un booleano dependiendo si es correcta o no
 
         DatosPregunta p = sacarPregunta();
 
@@ -83,7 +83,7 @@ public class JuegoPreguntas {
         }
     }
     
-    public static void main(String[] args) {
+    public static void main(String[] args) { //programa de test para comprobar el funcionamiento del programa
 
         Scanner sc = new Scanner(System.in);
         JuegoPreguntas juego = new JuegoPreguntas();
