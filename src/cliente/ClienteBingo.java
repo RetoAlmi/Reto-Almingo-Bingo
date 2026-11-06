@@ -34,36 +34,36 @@ public class ClienteBingo {
 			}
 		}
 
-		// Generar un UID único para la sesión del usuario
+		// Generar un UID unico para la sesion del usuario
 		int uid = generarUid();
 		String nombreCarpeta = nombre + "-" + uid;
 		String rutaCarpeta = RUTA_COMPARTIDA + "\\usuarios\\" + nombreCarpeta;
-		System.out.println("Tu UID: " + uid);
-		System.out.println("Carpeta: " + rutaCarpeta);
+		System.out.println("[INFO] Tu UID: " + uid);
+		System.out.println("[INFO] Carpeta: " + rutaCarpeta);
 
 		// Ruta de la carpeta de este usuario en la red compartida
 		File dirJugador = new File(rutaCarpeta);
 		dirJugador.mkdirs();
 
-		// 1. Guardar el archivo de identificación uid.txt
+		// 1. Guardar el archivo de identificacion uid.txt
 		try {
 			PrintWriter pwId = new PrintWriter(new File(dirJugador, "uid" + ".txt"));
 			pwId.println(uid);
 			pwId.println(nombre);
-			pwId.close(); // Cerrar fichero según la teoría
+			pwId.close(); // Cerrar fichero segun la teoria
 		} catch (FileNotFoundException e) {
-			System.out.println("Error al guardar el identificador.");
+			System.out.println("[ERROR] Error al guardar el identificador.");
 		}
 
-		// 2. El cliente genera su propio cartón 3x9 (5 números por fila, 12 ceros)
+		// 2. El cliente genera su propio carton 3x9 (5 numeros por fila, 12 ceros)
 		int[][] carton = generarCartonCliente();
 
-		// 3. Guardar el cartón en carton.txt para que el servidor lo detecte
+		// 3. Guardar el carton en carton.txt para que el servidor lo detecte
 		try {
 			PrintWriter pwCarton = new PrintWriter(new File(dirJugador, "carton.txt"));
-			for (int i = 0; i < 3; i++) {
-				for (int j = 0; j < 9; j++) {
-					pwCarton.println(carton[i][j]);
+			for (int fila = 0; fila < 3; fila++) {
+				for (int columna = 0; columna < 9; columna++) {
+					pwCarton.println(carton[fila][columna]);
 				}
 			}
 			pwCarton.close(); // Cerrar fichero
@@ -72,62 +72,103 @@ public class ClienteBingo {
 			PrintWriter pwPreguntas = new PrintWriter(new File(dirJugador, "preguntasHechas.txt"));
 			pwPreguntas.close();
 
-			System.out.println("\n[INFORMACION] ¡Cartón generado y guardado en la red con éxito!");
+			System.out.println("\n[LOG] Carton generado y guardado en la red con exito!");
 			System.out.println("-> Carpeta asignada: " + nombreCarpeta);
 		} catch (FileNotFoundException e) {
-			System.out.println("Error al guardar el cartón.");
+			System.out.println("Error al guardar el carton.");
 		}
 
 		int opcion = 0;
 		do {
-			// Imprimir el cartón 3x9 por pantalla aplicando el formato de 0 y guiones (-)
-			System.out.println("\n=== TU CARTÓN DE BINGO ===");
-			for (int i = 0; i < 3; i++) {
-				for (int j = 0; j < 9; j++) {
-					int valor = carton[i][j];
+			// Recargar el carton desde el archivo para reflejar los numeros tachados con '-'
+			// (Usamos una matriz de String para poder mostrar los numeros con el guion)
+			String[][] cartonVisual = new String[3][9];
+			try (Scanner scRecarga = new Scanner(new File(rutaCarpeta + "\\carton.txt"))) {
+				for (int fila = 0; fila < 3; fila++) {
+					for (int columna = 0; columna < 9; columna++) {
+						if (scRecarga.hasNextLine()) {
+							cartonVisual[fila][columna] = scRecarga.nextLine();
+						}
+					}
+				}
+			} catch (FileNotFoundException e) {
+				System.out.println("[ERROR] No se pudo leer el carton para mostrarlo.");
+			}
+
+			// Imprimir el carton 3x9 por pantalla actualizado
+			System.out.println("\n=== TU CARTON DE BINGO ===");
+			for (int fila = 0; fila < 3; fila++) {
+				for (int columna = 0; columna < 9; columna++) {
+					String valor = cartonVisual[fila][columna];
 					System.out.print("[ " + valor + " ]\t");
 				}
 				System.out.println();
 			}
+			
+			// Mostrar los numeros que han salido hasta ahora en partida.txt
+			System.out.print("\nNumeros que ya han salido: ");
+			try (Scanner scBolasSalidas = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"))) {
+				boolean primero = true;
+				while (scBolasSalidas.hasNext()) {
+					if (!primero) {
+						System.out.print(", ");
+					}
+					System.out.print(scBolasSalidas.next());
+					primero = false;
+				}
+				if (primero) {
+					System.out.print("Ninguno todavia");
+				}
+				System.out.println();
+			} catch (FileNotFoundException e) {
+				System.out.println("Ninguno todavia");
+			}
 
 			System.out.println("\n=== MENU ===");
-			System.out.println("1. Comprobar numero");
-			System.out.println("2. Comprobar linea");
-			System.out.println("3. Comprobar bingo");
+			System.out.println("1. Comprobar ultimo numero");
+			System.out.println("2. Comprobar numero");
+			System.out.println("3. Comprobar linea");
+			System.out.println("4. Comprobar bingo");
 			System.out.println("0. Salir");
-			System.out.print("Selecciona una opción: ");
+			System.out.print("\nSelecciona una opcion: ");
 
 			if (scTeclado.hasNextInt()) {
 				opcion = scTeclado.nextInt();
 			} else {
-				System.out.println("Por favor, introduce un número válido.");
+				System.out.println("[INFO] Por favor, introduce un numero valido.");
 				scTeclado.next(); // Limpiar entrada incorrecta
 				continue;
 			}
-
+			
 			if (opcion == 1) {
-				// Leer los números que han salido en partida.txt para comprobar aciertos
-				System.out.print("Introduce el numero para comprobar: ");
+				System.out.println("[LOG] Comprobando numeros...");
+			}
+
+			else if (opcion == 2) {
+				// Leer los numeros que han salido en partida.txt para comprobar aciertos
+				System.out.print("[NUMERO] Introduce el numero para comprobar: ");
 				int numero = scNumero.nextInt();
 				comprobarNumero(numero, rutaCarpeta);
 			}
 
-			if (opcion == 2) {
+			else if (opcion == 3) {
 				// Comprobar linea
 				boolean linea = false;
 				linea = comprobarLinea(rutaCarpeta);
 			}
 
-			if (opcion == 3) {
+			else if (opcion == 4) {
 				// Comprobar bingo
 				boolean bingo = false;
 				bingo = comprobarBingo(rutaCarpeta);
 			}
 
-			if (opcion == 0) {
-				System.out.println("\nSaliendo de la partida...");
-			} else {
-				System.out.println("\nOpción no válida.");
+			else if (opcion == 0) {
+				System.out.println("\n[LOG] Saliendo de la partida...");
+			}
+			
+			else {
+				System.out.println("\n[ALERTA] Opcion no valida.");
 			}
 		} while (opcion != 0);
 
@@ -156,7 +197,7 @@ public class ClienteBingo {
 				// Si hay bingo
 			} else if (!linea) {
 				// Si no hay bingo
-				System.out.println("[INFORMACION] No puedes hacer linea, no esta completa");
+				System.out.println("[INFO] No puedes hacer linea, no esta completa");
 			} else {
 				System.out.println("[ERROR] Error desconocido");
 			}
@@ -191,7 +232,7 @@ public class ClienteBingo {
 				// Si hay bingo
 			} else if (!bingo) {
 				// Si no hay bingo
-				System.out.println("[INFORMACION] No puedes hacer bingo, no esta completo");
+				System.out.println("[INFO] No puedes hacer bingo, no esta completo");
 			} else {
 				System.out.println("[ERROR] Error desconocido");
 			}
@@ -205,32 +246,76 @@ public class ClienteBingo {
 		return bingo;
 	}
 
-	private static void comprobarNumero(int numero, String rutaCarpeta) {
-		boolean esta = false;
-		int numeroLinea = 0;
+	private static void comprobarNumero(int numeroAComprobar, String rutaCarpeta) {
+		boolean estaEnPartida = false;
 
-		try {
-			Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"));
-			Scanner scCarton = new Scanner(new File(rutaCarpeta + "\\carton.txt"));
-
-			PrintWriter pwCarton = new PrintWriter(new File(rutaCarpeta, "\\carton.txt"));
-
-			while (scPartida.hasNextInt()) { // Lectura secuencial con hasNext
-				numero = scPartida.nextInt();
-				esta = true;
-				numeroLinea++;
+		// 1. Comprobar si el numero introducido esta en partida.txt
+		try (Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"))) {
+			while (scPartida.hasNextInt()) {
+				int bolaPartida = scPartida.nextInt();
+				if (bolaPartida == numeroAComprobar) {
+					estaEnPartida = true;
+					break;
+				}
 			}
-
-			if (esta) {
-				numero = numero - (2 * numero);
-			}
-
-			pwCarton.println(numeroLinea);
-
-			scPartida.close();
-			scCarton.close();
 		} catch (FileNotFoundException e) {
+			System.out.println("[ERROR] No se pudo encontrar el archivo partida.txt");
+			return;
+		}
 
+		if (!estaEnPartida) {
+			System.out.println("\n[INFO] El numero " + numeroAComprobar + " NO ha salido todavia en la partida.");
+			return;
+		}
+
+		// 2. Si esta en partida, leemos el carton actual (guardado en formato de 27 lineas o matriz)
+		// Como carton.txt guarda los 27 elementos secuencialmente (3 filas x 9 columnas), los cargamos:
+		String[] lineasCarton = new String[27];
+		boolean encontradoEnCarton = false;
+		int indice = 0;
+
+		try (Scanner scCartonLectura = new Scanner(new File(rutaCarpeta + "\\carton.txt"))) {
+			while (scCartonLectura.hasNextLine() && indice < 27) {
+				lineasCarton[indice] = scCartonLectura.nextLine();
+				indice++;
+			}
+		} catch (FileNotFoundException e) {
+			System.out.println("[ERROR] No se pudo leer el carton del usuario.");
+			return;
+		}
+
+		// 3. Buscar el numero en el carton y anteponer el "-" si coincide
+		for (int fila = 0; fila < 27; fila++) {
+			// Comparamos si la linea coincide con el numero (ignorando si ya tiene un guion previo)
+			if (lineasCarton[fila] != null && !lineasCarton[fila].startsWith("-")) {
+				try {
+					int val = Integer.parseInt(lineasCarton[fila]);
+					if (val == numeroAComprobar) {
+						lineasCarton[fila] = "-" + val; // Se le agrega el "-" por delante
+						encontradoEnCarton = true;
+					}
+				} catch (NumberFormatException e) {
+					// Si ya contiene un guion u otro caracter, se ignora
+				}
+			}
+		}
+
+		if (!encontradoEnCarton) {
+			System.out.println("\n[INFO] El numero " + numeroAComprobar + " ha salido en la partida, pero NO esta en tu carton!");
+			return;
+		}
+
+		// 4. Reescribir el archivo carton.txt con el numero tachado (-)
+		try (PrintWriter pwCartonEscritura = new PrintWriter(new File(rutaCarpeta + "\\carton.txt"))) {
+			for (int fila = 0; fila < 27; fila++) {
+				if (lineasCarton[fila] != null) {
+					pwCartonEscritura.println(lineasCarton[fila]);
+				}
+			}
+			System.out.println(
+					"\n[CORRECTO] El numero " + numeroAComprobar + " estaba en tu carton y ha sido marcado con '-'.");
+		} catch (FileNotFoundException e) {
+			System.out.println("[ERROR] No se pudo actualizar el archivo carton.txt");
 		}
 	}
 
@@ -243,29 +328,29 @@ public class ClienteBingo {
 		return uid;
 	}
 
-	// Método auxiliar para generar el cartón con números totalmente aleatorios (del 1 al 90) sin repetir
+	// Metodo auxiliar para generar el carton con numeros totalmente aleatorios (del 1 al 90) sin repetir
 	private static int[][] generarCartonCliente() {
 		int[][] carton = new int[3][9];
 		Random rnd = new Random();
 
-		// Inicializar el cartón a 0 (12 huecos vacíos en total, 4 por fila)
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 9; j++) {
-				carton[i][j] = 0;
+		// Inicializar el carton a 0 (12 huecos vacios en total, 4 por fila)
+		for (int fila = 0; fila < 3; fila++) {
+			for (int columna = 0; columna < 9; columna++) {
+				carton[fila][columna] = 0;
 			}
 		}
 
-		// Rellenar cada fila para que tenga exactamente 5 números
-		for (int i = 0; i < 3; i++) {
+		// Rellenar cada fila para que tenga exactamente 5 numeros
+		for (int fila = 0; fila < 3; fila++) {
 			int numerosColocados = 0;
 			while (numerosColocados < 5) {
-				int j = rnd.nextInt(9); // Columna aleatoria (0 al 8) donde se colocará el número
+				int columna = rnd.nextInt(9); // Columna aleatoria (0 al 8) donde se colocara el numero
 
-				if (carton[i][j] == 0) {
-					// Generar un número completamente aleatorio entre 1 y 90
+				if (carton[fila][columna] == 0) {
+					// Generar un numero completamente aleatorio entre 1 y 90
 					int num = rnd.nextInt(1, 91);
 
-					// Comprobar que el número NO se repita en todo el cartón
+					// Comprobar que el numero NO se repita en todo el carton
 					boolean repetidoEnCarton = false;
 					for (int f = 0; f < 3; f++) {
 						for (int c = 0; c < 9; c++) {
@@ -278,9 +363,9 @@ public class ClienteBingo {
 							break;
 					}
 
-					// Si no está repetido, se asigna a esa posición
+					// Si no este repetido, se asigna a esa posicion
 					if (!repetidoEnCarton) {
-						carton[i][j] = num;
+						carton[fila][columna] = num;
 						numerosColocados++;
 					}
 				}

@@ -1,7 +1,7 @@
 package servidor;
 
 import java.io.File;
-import java.io.FileOutputStream; // Necesario para añadir al archivo sin sobrescribir
+import java.io.FileOutputStream; // Necesario para aniadir al archivo sin sobrescribir
 import java.io.PrintWriter;
 import java.util.Random;
 import java.util.Scanner;
@@ -18,23 +18,23 @@ public class ServidorBingo {
 		int opcion = 0;
 		Random rnd = new Random();
 
-		// Bucle do...while para que el servidor no se cierre y repita el menú
+		// Bucle do...while para que el servidor no se cierre y repita el menu
 		do {
 			System.out.println("\n=== SERVIDOR DEL BINGO ALMINGO ===");
 			System.out.println("1. Inicializar partida");
 			System.out.println("2. Sacar bola del bombo");
 			System.out.println("3. Detectar y listar cartones de los clientes");
-			System.out.println("4. Ver cuántos usuarios hay registrados");
+			System.out.println("4. Ver cuantos usuarios hay registrados");
 			System.out.println("5. Eliminar todos los usuarios");
 			System.out.println("6. Eliminar datos de la partida");
 			System.out.println("7. Eliminar todos los datos");
 			System.out.println("0. Salir del Servidor");
-			System.out.print("Selecciona una opción: ");
+			System.out.print("Selecciona una opcion: ");
 
 			if (scTeclado.hasNextInt()) {
 				opcion = scTeclado.nextInt();
 			} else {
-				System.out.println("Por favor, introduce un número válido.");
+				System.out.println("Por favor, introduce un numero valido.");
 				scTeclado.next(); // Limpiar entrada incorrecta
 				continue;
 			}
@@ -47,20 +47,20 @@ public class ServidorBingo {
 					PrintWriter pwTotalBolas = new PrintWriter(new File(RUTA_TOTAL_BOLAS));
 					pwTotalBolas.print("");
 					pwTotalBolas.close();
-					System.out.println("\n[INFORMACION] ¡Partida inicializada!");
+					System.out.println("\n[INFO] Partida inicializada!");
 				} catch (FileNotFoundException e) {
 					System.out.println("Error al inicializar la partida.");
 				}
 
 			}
 
-			if (opcion == 2) {
+			else if (opcion == 2) {
 				int bolaNueva;
 				boolean encontrado;
 				int totalSalidos = 0;
 				int totalRestantes = 99;
 
-				// 1. Generar número aleatorio y comprobar que no esté en partida.txt
+				// 1. Generar numero aleatorio y comprobar que no este en partida.txt
 				do {
 					bolaNueva = rnd.nextInt(1, 100);
 					encontrado = false;
@@ -74,14 +74,14 @@ public class ServidorBingo {
 							}
 						}
 					} catch (FileNotFoundException e) {
-						// Si el archivo no existe todavía, asumimos que no está
+						// Si el archivo no existe todavia, asumimos que no esta
 					}
 
-				} while (encontrado); // Repite si el número fue encontrado en el archivo
+				} while (encontrado); // Repite si el numero fue encontrado en el archivo
 
-				int bola = bolaNueva; // Asignamos el número válido definitivo
+				int bola = bolaNueva; // Asignamos el numero valido definitivo
 
-				// 2. Leer cuántas bolas han salido y cuántas quedan en totalBolas.txt
+				// 2. Leer cuantas bolas han salido y cuantas quedan en totalBolas.txt
 				File fTotalBolas = new File(RUTA_TOTAL_BOLAS);
 				if (fTotalBolas.exists()) {
 					try (Scanner scLectura = new Scanner(fTotalBolas)) {
@@ -92,26 +92,23 @@ public class ServidorBingo {
 							totalRestantes = scLectura.nextInt();
 						}
 					} catch (FileNotFoundException e) {
-						// Ignorar si ocurre algún error de lectura
+						// Ignorar si ocurre algun error de lectura
 					}
 				}
 
 				totalSalidos++;
 				totalRestantes--;
 
-				// 3. Guardar el nuevo número en partida.txt (añadiéndolo abajo sin borrar lo
-				// anterior)
+				// 3. Guardar el nuevo numero en partida.txt (aniadiendolo en una nueva linea)
 				File fPartida = new File(RUTA_PARTIDA);
 				try {
-					// Usamos FileOutputStream con 'true' para hacer append (añadir en la siguiente
-					// línea)
+					// Usamos FileOutputStream con 'true' para hacer append (aniadir en la siguiente linea)
 					PrintWriter pwEscritura = new PrintWriter(new FileOutputStream(fPartida, true));
 					pwEscritura.println(bola);
 					pwEscritura.close();
 
-					// Mostramos el mensaje tal y como pediste
-					System.out.println("\n[INFORMACION] El número " + bola
-							+ " no estaba en el archivo y ha sido registrado con éxito.");
+					// Mostramos el mensaje
+					System.out.println("\n[INFO] El numero " + bola + " no estaba en el archivo y ha sido registrado con exito.");
 				} catch (FileNotFoundException e) {
 					System.out.println("Error al actualizar la partida.");
 				}
@@ -131,10 +128,10 @@ public class ServidorBingo {
 
 			}
 
-			if (opcion == 3) {
+			else if (opcion == 3) {
 				File dirUsuarios = new File(RUTA_USUARIOS);
 				if (!dirUsuarios.exists()) {
-					System.out.println("No hay carpeta de usuarios todavía.");
+					System.out.println("No hay carpeta de usuarios todavia.");
 				} else {
 					File[] listaCarpetas = dirUsuarios.listFiles();
 					if (listaCarpetas != null) {
@@ -142,11 +139,11 @@ public class ServidorBingo {
 						for (int i = 0; i < listaCarpetas.length; i++) {
 							if (listaCarpetas[i].isDirectory()) {
 								String nombreCarpeta = listaCarpetas[i].getName();
-								System.out.println("\nJugador/Sesión: " + nombreCarpeta);
+								System.out.println("\nJugador/Sesion: " + nombreCarpeta);
 
 								File fCarton = new File(listaCarpetas[i], "carton.txt");
 								if (fCarton.exists()) {
-									System.out.println("Cartón detectado en la red:");
+									System.out.println("Carton detectado en la red:");
 									try {
 										Scanner scCarton = new Scanner(fCarton);
 										for (int f = 0; f < 3; f++) {
@@ -159,10 +156,10 @@ public class ServidorBingo {
 										}
 										scCarton.close();
 									} catch (FileNotFoundException e) {
-										System.out.println("Error al leer el cartón.");
+										System.out.println("Error al leer el carton.");
 									}
 								} else {
-									System.out.println("Este usuario aún no ha generado su cartón.");
+									System.out.println("Este usuario aun no ha generado su carton.");
 								}
 							}
 						}
@@ -171,7 +168,7 @@ public class ServidorBingo {
 
 			}
 
-			if (opcion == 4) {
+			else if (opcion == 4) {
 				File dirUsuarios = new File(RUTA_USUARIOS);
 				int contadorUsuarios = 0;
 
@@ -186,34 +183,33 @@ public class ServidorBingo {
 					}
 				}
 				System.out.println(
-						"\n[INFORMACION] Número total de usuarios conectados/registrados: " + contadorUsuarios);
+						"\n[INFO] Numero total de usuarios conectados/registrados: " + contadorUsuarios);
 
 			}
-			if (opcion == 5) {
+			else if (opcion == 5) {
 				eliminarUsuarios();
 
-			} else {
-				System.out.println("\n[INFORMACION] No hay carpeta de usuarios que vaciar.");
 			}
 
-			if (opcion == 6) {
+			else if (opcion == 6) {
 				eliminarPartida();
 				eliminarTotalBolas();
 
-			} else {
-				System.out.println("\n[INFORMACION] No hay carpeta de usuarios que vaciar.");
 			}
-			if (opcion == 7) {
+			
+			else if (opcion == 7) {
 				eliminarUsuarios();
 				eliminarPartida();
 				eliminarTotalBolas();
 
 			}
 
-			if (opcion == 0) {
+			else if (opcion == 0) {
 				System.out.println("\nSaliendo del servidor...");
-			} else {
-				System.out.println("\nOpción no válida.");
+			}
+			
+			else {
+				System.out.println("\nOpcion no valida.");
 			}
 
 		} while (opcion != 0);
@@ -240,9 +236,9 @@ public class ServidorBingo {
 				}
 			}
 			System.out
-					.println("\n[INFORMACION] ¡Se han borrado todos los usuarios y sus carpetas de la red con éxito!");
+					.println("\n[INFO] Se han borrado todos los usuarios y sus carpetas de la red con exito!");
 		} else {
-			System.out.println("\n[INFORMACION] No hay carpeta de usuarios que vaciar.");
+			System.out.println("\n[INFO] No hay carpeta de usuarios que vaciar.");
 		}
 	}
 
@@ -251,10 +247,10 @@ public class ServidorBingo {
 
 		if (partidaArchivo.exists()) {
 			partidaArchivo.delete();
-			System.out.println("\n[INFORMACION] ¡Se ha borrado el archivo 'partida.txt' de la red con éxito!");
+			System.out.println("\n[INFO] Se ha borrado el archivo 'partida.txt' de la red con exito!");
 
 		} else {
-			System.out.println("\n[INFORMACION] No hay carpeta de usuarios que vaciar.");
+			System.out.println("\n[INFO] No hay carpeta de usuarios que vaciar.");
 		}
 	}
 
@@ -263,10 +259,10 @@ public class ServidorBingo {
 
 		if (totalBolasArchivo.exists()) {
 			totalBolasArchivo.delete();
-			System.out.println("\n[INFORMACION] ¡Se ha borrado el archivo 'totalBolas.txt' de la red con éxito!");
+			System.out.println("\n[INFO] Se ha borrado el archivo 'totalBolas.txt' de la red con exito!");
 
 		} else {
-			System.out.println("\n[INFORMACION] No hay carpeta de usuarios que vaciar.");
+			System.out.println("\n[INFO] No hay carpeta de usuarios que vaciar.");
 		}
 	}
 }
