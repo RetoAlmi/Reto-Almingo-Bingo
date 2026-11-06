@@ -126,9 +126,10 @@ public class ClienteBingo {
 			}
 
 			// Mostrar los numeros que han salido hasta ahora en partida.txt
-			System.out.print("\nNumeros que ya han salido: ");
+			System.out.println("\nNumeros que ya han salido:");
 			try (Scanner scBolasSalidas = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"))) {
 				boolean primero = true;
+				int saltoLinea;
 				while (scBolasSalidas.hasNext()) {
 					if (!primero) {
 						System.out.print(", ");

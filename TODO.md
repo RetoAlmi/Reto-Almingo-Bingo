@@ -1,9 +1,13 @@
 # TODO
 
+## Arreglar:
+- Hacer que solo salga una pregunta por cada linea.
+- Hacer salto de linea cada ciertos numeros.
+
 ## Hacer:
-- Comprobacion automatica por parte del servidor si un jugador gana.
-- Comprobacion automatica por parte del cliente para terminar la partida en el caso de que alguien gane.
-- Comprobacion automatica de los nuevos numeros.
+- Comprobación automática por parte del servidor si un jugador gana.
+- Comprobación automática por parte del cliente para terminar la partida en el caso de que alguien gane.
+- Comprobación automática de los nuevos números.
 
 ## Repaso:
-- Revisar codigos en caso de error.
+- Revisar códigos en caso de error.

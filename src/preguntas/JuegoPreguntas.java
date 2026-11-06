@@ -87,15 +87,4 @@ public class JuegoPreguntas {
 		}
 	}
 
-	public static void main(String[] args) { // programa de test para comprobar el funcionamiento del programa
-
-		Scanner sc = new Scanner(System.in);
-		JuegoPreguntas juego = new JuegoPreguntas();
-		int x = 1, y = 0;
-		while (x > y) {
-			juego.lanzarPregunta(sc);
-
-		}
-	}
-
 }
