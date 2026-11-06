@@ -243,12 +243,12 @@ public class ClienteBingo {
 		return uid;
 	}
 
-	// Método auxiliar para que el cliente genere el cartón aleatorio
+	// Método auxiliar para generar el cartón con números totalmente aleatorios (del 1 al 90) sin repetir
 	private static int[][] generarCartonCliente() {
 		int[][] carton = new int[3][9];
 		Random rnd = new Random();
 
-		// Inicializar con 0 (12 huecos vacíos en total, 4 por fila)
+		// Inicializar el cartón a 0 (12 huecos vacíos en total, 4 por fila)
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 9; j++) {
 				carton[i][j] = 0;
@@ -259,23 +259,27 @@ public class ClienteBingo {
 		for (int i = 0; i < 3; i++) {
 			int numerosColocados = 0;
 			while (numerosColocados < 5) {
-				int j = rnd.nextInt(9);
+				int j = rnd.nextInt(9); // Columna aleatoria (0 al 8) donde se colocará el número
 
 				if (carton[i][j] == 0) {
-					int min = 1;
-					int max = 91;
+					// Generar un número completamente aleatorio entre 1 y 90
+					int num = rnd.nextInt(1, 91);
 
-					int num = min + rnd.nextInt(min, max);
-
-					boolean repetido = false;
+					// Comprobar que el número NO se repita en todo el cartón
+					boolean repetidoEnCarton = false;
 					for (int f = 0; f < 3; f++) {
-						if (carton[f][j] == num) {
-							repetido = true;
-							break;
+						for (int c = 0; c < 9; c++) {
+							if (carton[f][c] == num) {
+								repetidoEnCarton = true;
+								break;
+							}
 						}
+						if (repetidoEnCarton)
+							break;
 					}
 
-					if (!repetido) {
+					// Si no está repetido, se asigna a esa posición
+					if (!repetidoEnCarton) {
 						carton[i][j] = num;
 						numerosColocados++;
 					}
