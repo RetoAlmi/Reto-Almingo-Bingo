@@ -72,6 +72,10 @@ public class ClienteBingo {
 			PrintWriter pwPreguntas = new PrintWriter(new File(dirJugador, "preguntasHechas.txt"));
 			pwPreguntas.close();
 
+			// Crear archivo para guardar el resultado final
+			PrintWriter pwResultado = new PrintWriter(new File(dirJugador, "resultado.txt"));
+			pwResultado.close();
+
 			System.out.println("\n[LOG] Carton generado y guardado en la red con exito!");
 			System.out.println("-> Carpeta asignada: " + nombreCarpeta);
 		} catch (FileNotFoundException e) {
@@ -157,11 +161,14 @@ public class ClienteBingo {
 				boolean linea = false;
 				linea = comprobarLinea(rutaCarpeta);
 			}
-
+			
 			else if (opcion == 4) {
 				// Comprobar bingo
 				boolean bingo = false;
 				bingo = comprobarBingo(rutaCarpeta);
+				if (bingo) {
+					opcion = 0;
+				}
 			}
 			
 			else if (opcion == 10) {
@@ -305,38 +312,76 @@ public class ClienteBingo {
 	}
 
 	private static boolean comprobarBingo(String rutaCarpeta) {
-		boolean bingo = false;
-		String contiene;
+		boolean bingoCompleto = true;
+		boolean tieneNumeros = false;
 
 		try {
-			Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"));
 			Scanner scCarton = new Scanner(new File(rutaCarpeta + "\\carton.txt"));
-			while (scCarton.hasNextLine()) { // Lectura secuencial con hasNextLine
-				contiene = scCarton.nextLine();
-				if (contiene.startsWith("-") && PREGUNTAS_CORRECTAS >= 3) {
-					bingo = true;
-				}
-				if (!contiene.startsWith("-")) {
-					bingo = false;
+			
+			// Leer todo el carton (27 valores: 3 filas x 9 columnas)
+			while (scCarton.hasNextLine()) {
+				String valor = scCarton.nextLine();
+				// Si encontramos un valor que no sea 0
+				if (!valor.equals("0")) {
+					tieneNumeros = true;
+					// Si algun numero valido NO esta tachado con '-', entonces no hay bingo
+					if (!valor.startsWith("-")) {
+						bingoCompleto = false;
+						break;
+					}
 				}
 			}
-
-			if (bingo) {
-				// Si hay bingo
-			} else if (!bingo) {
-				// Si no hay bingo
-				System.out.println("[INFO] No puedes hacer bingo, no esta completo.");
-			} else {
-				System.out.println("[ERROR] Error desconocido.");
-			}
-
-			scPartida.close();
 			scCarton.close();
-		} catch (FileNotFoundException e) {
 
+			// Si el carton estaba vacio (raro, pero preventivo)
+			if (!tieneNumeros) {
+				bingoCompleto = false;
+			}
+
+			if (bingoCompleto) {
+				// Calcular estadisticas: contar cuantas bolas han salido en total de partida.txt
+				int totalBolasPartida = 0;
+				try (Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"))) {
+					while (scPartida.hasNextInt()) {
+						scPartida.nextInt();
+						totalBolasPartida++;
+					}
+				} catch (FileNotFoundException e) {
+					// Ignorar si no existe
+				}
+
+				System.out.println("=== PARTIDA FINALIZADA ===");
+				System.out.println("\n[BINGO] Felicidades! Has completado todo el carton correctamente.");
+				System.out.println("[INFO] El estado y estadisticas se han guardado en comprobado.txt. Partida finalizada!");
+				
+				// Mostrar estadisticas por pantalla
+				System.out.println("\n=== ESTADISTICAS DE LA PARTIDA ===");
+				System.out.println("- Bolas totales sacadas en la partida: " + totalBolasPartida);
+				System.out.println("- Preguntas correctas: " + PREGUNTAS_CORRECTAS);
+				System.out.println("- Preguntas fallidas: " + PREGUNTAS_FALLIDAS);
+
+				// Guardar el resultado y estadisticas en el archivo comprobado.txt
+				try (PrintWriter pwComprobado = new PrintWriter(new File(rutaCarpeta + "\\resultado.txt"))) {
+					pwComprobado.println("BINGO: COMPLETO Y CORRECTO!");
+					pwComprobado.println("=== ESTADISTICAS ===");
+					pwComprobado.println("Bolas totales sacadas: " + totalBolasPartida);
+					pwComprobado.println("Preguntas correctas: " + PREGUNTAS_CORRECTAS);
+					pwComprobado.println("Preguntas fallidas: " + PREGUNTAS_FALLIDAS);
+				}
+			} else {
+				// Guardar estado incompleto en comprobado.txt
+				try (PrintWriter pwComprobado = new PrintWriter(new File(rutaCarpeta + "\\comprobado.txt"))) {
+					pwComprobado.println("BINGO: Incompleto");
+				}
+				System.out.println("\n[INFO] Todavia no hay BINGO, te faltan numeros por tachar.");
+			}
+
+		} catch (FileNotFoundException e) {
+			System.out.println("[ERROR] No se pudo encontrar el archivo carton.txt para comprobar el bingo.");
+			bingoCompleto = false;
 		}
 
-		return bingo;
+		return bingoCompleto;
 	}
 
 	private static void comprobarNumero(int numeroAComprobar, String rutaCarpeta) {
