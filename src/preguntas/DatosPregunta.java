@@ -1,52 +1,53 @@
 package preguntas;
 
-public class DatosPregunta { // este programa basicamente prepara las variables para llenarlas con las preguntas, se colocan los getters para comunicarse con el otro programa
+public class DatosPregunta { // este programa basicamente prepara las variables para llenarlas con las
+								// preguntas, se colocan los getters para comunicarse con el otro programa
 
-    int id;
-    String textoPregunta;
-    String opA;
-    String opB;
-    String opC;
-    String opD;
-    String correcta;
+	int id;
+	String textoPregunta;
+	String opA;
+	String opB;
+	String opC;
+	String opD;
+	String correcta;
 
-    public DatosPregunta(int id, String textoPregunta, String opA,
-            String opB, String opC, String opD, String correcta) {
+	public DatosPregunta(int id, String textoPregunta, String opA, String opB, String opC, String opD,
+			String correcta) {
 
-        this.id = id;
-        this.textoPregunta = textoPregunta;
-        this.opA = opA;
-        this.opB = opB;
-        this.opC = opC;
-        this.opD = opD;
-        this.correcta = correcta;
-    }
+		this.id = id;
+		this.textoPregunta = textoPregunta;
+		this.opA = opA;
+		this.opB = opB;
+		this.opC = opC;
+		this.opD = opD;
+		this.correcta = correcta;
+	}
 
-    public int getId() {
-        return id;
-    }
+	public int getId() {
+		return id;
+	}
 
-    public String getTextoPregunta() {
-        return textoPregunta;
-    }
+	public String getTextoPregunta() {
+		return textoPregunta;
+	}
 
-    public String getOpA() {
-        return opA;
-    }
+	public String getOpA() {
+		return opA;
+	}
 
-    public String getOpB() {
-        return opB;
-    }
+	public String getOpB() {
+		return opB;
+	}
 
-    public String getOpC() {
-        return opC;
-    }
+	public String getOpC() {
+		return opC;
+	}
 
-    public String getOpD() {
-        return opD;
-    }
+	public String getOpD() {
+		return opD;
+	}
 
-    public String getCorrecta() {
-        return correcta;
-    }
+	public String getCorrecta() {
+		return correcta;
+	}
 }

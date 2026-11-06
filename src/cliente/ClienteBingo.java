@@ -15,10 +15,24 @@ public class ClienteBingo {
 		Scanner scTeclado = new Scanner(System.in);
 		Scanner scNumero = new Scanner(System.in);
 		int numeroIntroducido;
+		int maxCaracteresNombre = 13;
+		int minCaracteresNombre = 3;
 
 		System.out.println("=== CLIENTE DEL BINGO ALMINGO ===");
 		System.out.print("Introduce tu nombre: ");
 		String nombre = scTeclado.next();
+		while (nombre.length() > maxCaracteresNombre && nombre.length() < minCaracteresNombre) {
+			if (nombre.length() < minCaracteresNombre) {
+				System.out.println("Tu nombre tiene que tener mas de 3 caracteres.");
+				System.out.print("Introduce tu nombre: ");
+				nombre = scTeclado.next();
+			}
+			if (nombre.length() > maxCaracteresNombre) {
+				System.out.println("Tu nombre tiene que tener menos de 13 caracteres.");
+				System.out.print("Introduce tu nombre: ");
+				nombre = scTeclado.next();
+			}
+		}
 
 		// Generar un UID único para la sesión del usuario
 		int uid = generarUid();
@@ -31,10 +45,10 @@ public class ClienteBingo {
 		File dirJugador = new File(rutaCarpeta);
 		dirJugador.mkdirs();
 
-		// 1. Guardar el archivo de identificación numero-{nombre-uid}.txt
+		// 1. Guardar el archivo de identificación uid.txt
 		try {
-			PrintWriter pwId = new PrintWriter(new File(dirJugador, "id-" + nombreCarpeta + ".txt"));
-			pwId.println(nombreCarpeta);
+			PrintWriter pwId = new PrintWriter(new File(dirJugador, "uid" + ".txt"));
+			pwId.println(uid);
 			pwId.println(nombre);
 			pwId.close(); // Cerrar fichero según la teoría
 		} catch (FileNotFoundException e) {
@@ -47,16 +61,17 @@ public class ClienteBingo {
 		// 3. Guardar el cartón en carton.txt para que el servidor lo detecte
 		try {
 			PrintWriter pwCarton = new PrintWriter(new File(dirJugador, "carton.txt"));
-			PrintWriter pwCartonComprobar = new PrintWriter(new File(dirJugador, "cartonComprobar.txt"));
 			for (int i = 0; i < 3; i++) {
 				for (int j = 0; j < 9; j++) {
 					pwCarton.println(carton[i][j]);
-					pwCartonComprobar.println(carton[i][j]);
 				}
 			}
 			pwCarton.close(); // Cerrar fichero
-			pwCartonComprobar.close();
-			
+
+			// Crear archivo para guardar las preguntas hechas
+			PrintWriter pwPreguntas = new PrintWriter(new File(dirJugador, "preguntasHechas.txt"));
+			pwPreguntas.close();
+
 			System.out.println("\n[INFORMACION] ¡Cartón generado y guardado en la red con éxito!");
 			System.out.println("-> Carpeta asignada: " + nombreCarpeta);
 		} catch (FileNotFoundException e) {
@@ -119,12 +134,42 @@ public class ClienteBingo {
 		scTeclado.close();
 		scNumero.close();
 	}
-	
+
 	private static boolean comprobarLinea(String rutaCarpeta) {
 		boolean linea = false;
+		String contiene;
+
+		try {
+			Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"));
+			Scanner scCarton = new Scanner(new File(rutaCarpeta + "\\carton.txt"));
+			while (scCarton.hasNextLine()) { // Lectura secuencial con hasNextLine
+				contiene = scCarton.nextLine();
+				if (contiene.startsWith("-") && PREGUNTAS_CORRECTAS >= 3) {
+					linea = true;
+				}
+				if (!contiene.startsWith("-")) {
+					linea = false;
+				}
+			}
+
+			if (linea) {
+				// Si hay bingo
+			} else if (!linea) {
+				// Si no hay bingo
+				System.out.println("[INFORMACION] No puedes hacer linea, no esta completa");
+			} else {
+				System.out.println("[ERROR] Error desconocido");
+			}
+
+			scPartida.close();
+			scCarton.close();
+		} catch (FileNotFoundException e) {
+
+		}
+
 		return linea;
 	}
-	
+
 	private static boolean comprobarBingo(String rutaCarpeta) {
 		boolean bingo = false;
 		String contiene;
@@ -132,11 +177,10 @@ public class ClienteBingo {
 		try {
 			Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"));
 			Scanner scCarton = new Scanner(new File(rutaCarpeta + "\\carton.txt"));
-			Scanner scCartonComprobar = new Scanner(new File(rutaCarpeta + "\\cartonComprobar.txt"));
-			while (scCartonComprobar.hasNextLine()) { // Lectura secuencial con hasNextLine
-				contiene = scCartonComprobar.nextLine();
-				if (contiene.startsWith("-")) {
-					bingo = true;					
+			while (scCarton.hasNextLine()) { // Lectura secuencial con hasNextLine
+				contiene = scCarton.nextLine();
+				if (contiene.startsWith("-") && PREGUNTAS_CORRECTAS >= 3) {
+					bingo = true;
 				}
 				if (!contiene.startsWith("-")) {
 					bingo = false;
@@ -154,11 +198,10 @@ public class ClienteBingo {
 
 			scPartida.close();
 			scCarton.close();
-			scCartonComprobar.close();
 		} catch (FileNotFoundException e) {
 
 		}
-		
+
 		return bingo;
 	}
 
@@ -169,11 +212,9 @@ public class ClienteBingo {
 		try {
 			Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"));
 			Scanner scCarton = new Scanner(new File(rutaCarpeta + "\\carton.txt"));
-			Scanner scCartonComprobar = new Scanner(new File(rutaCarpeta + "\\cartonComprobar.txt"));
-			
+
 			PrintWriter pwCarton = new PrintWriter(new File(rutaCarpeta, "\\carton.txt"));
-			PrintWriter pwCartonComprobar = new PrintWriter(new File(rutaCarpeta, "\\cartonComprobar.txt"));
-			
+
 			while (scPartida.hasNextInt()) { // Lectura secuencial con hasNext
 				numero = scPartida.nextInt();
 				esta = true;
@@ -183,13 +224,11 @@ public class ClienteBingo {
 			if (esta) {
 				numero = numero - (2 * numero);
 			}
-			
 
 			pwCarton.println(numeroLinea);
 
 			scPartida.close();
 			scCarton.close();
-			scCartonComprobar.close();
 		} catch (FileNotFoundException e) {
 
 		}
