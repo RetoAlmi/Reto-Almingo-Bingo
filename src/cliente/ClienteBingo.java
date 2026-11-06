@@ -80,7 +80,8 @@ public class ClienteBingo {
 
 		int opcion = 0;
 		do {
-			// Recargar el carton desde el archivo para reflejar los numeros tachados con '-'
+			// Recargar el carton desde el archivo para reflejar los numeros tachados con
+			// '-'
 			// (Usamos una matriz de String para poder mostrar los numeros con el guion)
 			String[][] cartonVisual = new String[3][9];
 			try (Scanner scRecarga = new Scanner(new File(rutaCarpeta + "\\carton.txt"))) {
@@ -104,7 +105,7 @@ public class ClienteBingo {
 				}
 				System.out.println();
 			}
-			
+
 			// Mostrar los numeros que han salido hasta ahora en partida.txt
 			System.out.print("\nNumeros que ya han salido: ");
 			try (Scanner scBolasSalidas = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"))) {
@@ -139,7 +140,7 @@ public class ClienteBingo {
 				scTeclado.next(); // Limpiar entrada incorrecta
 				continue;
 			}
-			
+
 			if (opcion == 1) {
 				System.out.println("[LOG] Comprobando numeros...");
 			}
@@ -166,7 +167,7 @@ public class ClienteBingo {
 			else if (opcion == 0) {
 				System.out.println("\n[LOG] Saliendo de la partida...");
 			}
-			
+
 			else {
 				System.out.println("\n[ALERTA] Opcion no valida.");
 			}
@@ -268,8 +269,10 @@ public class ClienteBingo {
 			return;
 		}
 
-		// 2. Si esta en partida, leemos el carton actual (guardado en formato de 27 lineas o matriz)
-		// Como carton.txt guarda los 27 elementos secuencialmente (3 filas x 9 columnas), los cargamos:
+		// 2. Si esta en partida, leemos el carton actual (guardado en formato de 27
+		// lineas o matriz)
+		// Como carton.txt guarda los 27 elementos secuencialmente (3 filas x 9
+		// columnas), los cargamos:
 		String[] lineasCarton = new String[27];
 		boolean encontradoEnCarton = false;
 		int indice = 0;
@@ -286,7 +289,8 @@ public class ClienteBingo {
 
 		// 3. Buscar el numero en el carton y anteponer el "-" si coincide
 		for (int fila = 0; fila < 27; fila++) {
-			// Comparamos si la linea coincide con el numero (ignorando si ya tiene un guion previo)
+			// Comparamos si la linea coincide con el numero (ignorando si ya tiene un guion
+			// previo)
 			if (lineasCarton[fila] != null && !lineasCarton[fila].startsWith("-")) {
 				try {
 					int val = Integer.parseInt(lineasCarton[fila]);
@@ -301,7 +305,8 @@ public class ClienteBingo {
 		}
 
 		if (!encontradoEnCarton) {
-			System.out.println("\n[INFO] El numero " + numeroAComprobar + " ha salido en la partida, pero NO esta en tu carton!");
+			System.out.println(
+					"\n[INFO] El numero " + numeroAComprobar + " ha salido en la partida, pero NO esta en tu carton!");
 			return;
 		}
 
@@ -328,7 +333,8 @@ public class ClienteBingo {
 		return uid;
 	}
 
-	// Metodo auxiliar para generar el carton con numeros totalmente aleatorios (del 1 al 90) sin repetir
+	// Metodo auxiliar para generar el carton con numeros totalmente aleatorios (del
+	// 1 al 90) sin repetir
 	private static int[][] generarCartonCliente() {
 		int[][] carton = new int[3][9];
 		Random rnd = new Random();

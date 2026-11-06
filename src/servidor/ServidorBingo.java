@@ -102,13 +102,15 @@ public class ServidorBingo {
 				// 3. Guardar el nuevo numero en partida.txt (aniadiendolo en una nueva linea)
 				File fPartida = new File(RUTA_PARTIDA);
 				try {
-					// Usamos FileOutputStream con 'true' para hacer append (aniadir en la siguiente linea)
+					// Usamos FileOutputStream con 'true' para hacer append (aniadir en la siguiente
+					// linea)
 					PrintWriter pwEscritura = new PrintWriter(new FileOutputStream(fPartida, true));
 					pwEscritura.println(bola);
 					pwEscritura.close();
 
 					// Mostramos el mensaje
-					System.out.println("\n[INFO] El numero " + bola + " no estaba en el archivo y ha sido registrado con exito.");
+					System.out.println(
+							"\n[INFO] El numero " + bola + " no estaba en el archivo y ha sido registrado con exito.");
 				} catch (FileNotFoundException e) {
 					System.out.println("Error al actualizar la partida.");
 				}
@@ -182,11 +184,9 @@ public class ServidorBingo {
 						}
 					}
 				}
-				System.out.println(
-						"\n[INFO] Numero total de usuarios conectados/registrados: " + contadorUsuarios);
+				System.out.println("\n[INFO] Numero total de usuarios conectados/registrados: " + contadorUsuarios);
 
-			}
-			else if (opcion == 5) {
+			} else if (opcion == 5) {
 				eliminarUsuarios();
 
 			}
@@ -196,7 +196,7 @@ public class ServidorBingo {
 				eliminarTotalBolas();
 
 			}
-			
+
 			else if (opcion == 7) {
 				eliminarUsuarios();
 				eliminarPartida();
@@ -207,7 +207,7 @@ public class ServidorBingo {
 			else if (opcion == 0) {
 				System.out.println("\nSaliendo del servidor...");
 			}
-			
+
 			else {
 				System.out.println("\nOpcion no valida.");
 			}
@@ -235,8 +235,7 @@ public class ServidorBingo {
 					}
 				}
 			}
-			System.out
-					.println("\n[INFO] Se han borrado todos los usuarios y sus carpetas de la red con exito!");
+			System.out.println("\n[INFO] Se han borrado todos los usuarios y sus carpetas de la red con exito!");
 		} else {
 			System.out.println("\n[INFO] No hay carpeta de usuarios que vaciar.");
 		}
