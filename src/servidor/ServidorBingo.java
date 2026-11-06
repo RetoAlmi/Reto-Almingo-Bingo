@@ -12,6 +12,7 @@ public class ServidorBingo {
 	public static final String RUTA_USUARIOS = RUTA_COMPARTIDA + "\\usuarios";
 	public static final String RUTA_PARTIDA = RUTA_COMPARTIDA + "\\partida.txt";
 	public static final String RUTA_TOTAL_BOLAS = RUTA_COMPARTIDA + "\\totalBolas.txt";
+	public static final String RUTA_ESTADO_PARTIDA = RUTA_COMPARTIDA + "\\estadoPartida.txt";
 
 	public static void main(String[] args) {
 		Scanner scTeclado = new Scanner(System.in);
@@ -28,6 +29,9 @@ public class ServidorBingo {
 			System.out.println("5. Eliminar todos los usuarios");
 			System.out.println("6. Eliminar datos de la partida");
 			System.out.println("7. Eliminar todos los datos");
+			System.out.println("8. Comprobar estado de la partida");
+			System.out.println("-> Para comprobar si hay algun ganador.");
+			System.out.println("-> En el caso de que haya un ganador, se finalizara la partida.");
 			System.out.println("0. Salir del Servidor");
 			System.out.print("Selecciona una opcion: ");
 
@@ -58,11 +62,11 @@ public class ServidorBingo {
 				int bolaNueva;
 				boolean encontrado;
 				int totalSalidos = 0;
-				int totalRestantes = 99;
+				int totalRestantes = 90;
 
 				// 1. Generar numero aleatorio y comprobar que no este en partida.txt
 				do {
-					bolaNueva = rnd.nextInt(1, 100);
+					bolaNueva = rnd.nextInt(1, 91);
 					encontrado = false;
 
 					try (Scanner lector = new Scanner(new File(RUTA_PARTIDA))) {

@@ -10,8 +10,8 @@ import preguntas.JuegoPreguntas;
 
 public class ClienteBingo {
 	public static final String RUTA_COMPARTIDA = "\\\\DESKTOP-V7J205P\\Reto-Almingo-Bingo";
-	public static final int PREGUNTAS_CORRECTAS = 0;
-	public static final int PREGUNTAS_FALLIDAS = 0;
+	public static int PREGUNTAS_CORRECTAS = 0;
+	public static int PREGUNTAS_FALLIDAS = 0;
 
 	public static void main(String[] args) {
 		Scanner scTeclado = new Scanner(System.in);
@@ -74,9 +74,11 @@ public class ClienteBingo {
 			PrintWriter pwPreguntas = new PrintWriter(new File(dirJugador, "preguntasHechas.txt"));
 			pwPreguntas.close();
 
-			// Crear archivo para guardar el resultado final
+			// Crear archivo para guardar el resultado final y sus estadisticas
 			PrintWriter pwResultado = new PrintWriter(new File(dirJugador, "resultado.txt"));
 			pwResultado.close();
+			PrintWriter pwEstadisticas = new PrintWriter(new File(dirJugador, "estadisticas.txt"));
+			pwEstadisticas.close();
 
 			System.out.println("\n[LOG] Carton generado y guardado en la red con exito!");
 			System.out.println("-> Carpeta asignada: " + nombreCarpeta);
@@ -160,16 +162,39 @@ public class ClienteBingo {
 
 			else if (opcion == 3) {
 				// Comprobar linea
-				boolean linea = false;
+				boolean linea, respuestaCorrecta = false;
 				linea = comprobarLinea(rutaCarpeta);
+				if (linea) {
+					respuestaCorrecta = realizarPregunta();
+					if (respuestaCorrecta) {
+						PREGUNTAS_CORRECTAS++;
+					}
+					else if (!respuestaCorrecta) {
+						PREGUNTAS_FALLIDAS--;
+					}
+					else {
+						System.out.println("[ERROR] Error al obtener la respuesta si es correcta o erronea.");
+					}
+				}
 			}
 			
 			else if (opcion == 4) {
 				// Comprobar bingo
-				boolean bingo = false;
+				boolean bingo, respuestaCorrecta = false;
 				bingo = comprobarBingo(rutaCarpeta);
 				if (bingo) {
-					opcion = 0;
+					respuestaCorrecta = realizarPregunta();
+					if (respuestaCorrecta) {
+						PREGUNTAS_CORRECTAS++;
+						opcion = 0;
+					}
+					else if (!respuestaCorrecta) {
+						PREGUNTAS_FALLIDAS--;
+						opcion = 0;
+					}
+					else {
+						System.out.println("[ERROR] Error al obtener la respuesta si es correcta o erronea.");
+					}
 				}
 			}
 			
@@ -362,8 +387,17 @@ public class ClienteBingo {
 				System.out.println("- Preguntas correctas: " + PREGUNTAS_CORRECTAS);
 				System.out.println("- Preguntas fallidas: " + PREGUNTAS_FALLIDAS);
 
-				// Guardar el resultado y estadisticas en el archivo comprobado.txt
-				try (PrintWriter pwComprobado = new PrintWriter(new File(rutaCarpeta + "\\resultado.txt"))) {
+				// Guardar las estadisticas en el archivo estadisticas.txt
+				try (PrintWriter pwComprobado = new PrintWriter(new File(rutaCarpeta + "\\estadisticas.txt"))) {
+					pwComprobado.println("BINGO: COMPLETO Y CORRECTO!");
+					pwComprobado.println("=== ESTADISTICAS ===");
+					pwComprobado.println("Bolas totales sacadas: " + totalBolasPartida);
+					pwComprobado.println("Preguntas correctas: " + PREGUNTAS_CORRECTAS);
+					pwComprobado.println("Preguntas fallidas: " + PREGUNTAS_FALLIDAS);
+				}
+
+				// Guardar el resultado en el archivo resultado.txt
+				try (PrintWriter pwComprobado = new PrintWriter(new File(rutaCarpeta + "\\estadisticas.txt"))) {
 					pwComprobado.println("BINGO: COMPLETO Y CORRECTO!");
 					pwComprobado.println("=== ESTADISTICAS ===");
 					pwComprobado.println("Bolas totales sacadas: " + totalBolasPartida);
@@ -519,11 +553,11 @@ public class ClienteBingo {
 		return carton;
 	}
 	
-	private static boolean pregunta() {
+	private static boolean realizarPregunta() {
 		boolean preguntaCorrecta = false;
 		Scanner sc = new Scanner(System.in);
     	JuegoPreguntas juego = new JuegoPreguntas();
-    	juego.lanzarPregunta(sc);
+    	preguntaCorrecta = juego.lanzarPregunta(sc);
     	return preguntaCorrecta;
 	}
 }
