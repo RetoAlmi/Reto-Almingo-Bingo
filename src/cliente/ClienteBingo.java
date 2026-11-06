@@ -118,11 +118,11 @@ public class ClienteBingo {
 					primero = false;
 				}
 				if (primero) {
-					System.out.print("Ninguno todavia");
+					System.out.print("Ninguno todavia.");
 				}
 				System.out.println();
 			} catch (FileNotFoundException e) {
-				System.out.println("Ninguno todavia");
+				System.out.println("Ninguno todavia.");
 			}
 
 			System.out.println("\n=== MENU ===");
@@ -163,6 +163,13 @@ public class ClienteBingo {
 				boolean bingo = false;
 				bingo = comprobarBingo(rutaCarpeta);
 			}
+			
+			else if (opcion == 10) {
+				// Opcion oculta para comprobar todos los numeros que han salido en partida.txt
+				System.out.println("[ADMIN] Comprobancion automatica de todos los numeros.");
+				comprobarTodosLosNumeros(rutaCarpeta);
+				System.out.println("[ADMIN] Todos los numeros comprobados.");
+			}
 
 			else if (opcion == 0) {
 				System.out.println("\n[LOG] Saliendo de la partida...");
@@ -177,39 +184,124 @@ public class ClienteBingo {
 		scNumero.close();
 	}
 
+	private static void comprobarTodosLosNumeros(String rutaCarpeta) {
+		try {
+			// 1. Leer todas las bolas que han salido en partida.txt
+			Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"));
+			java.util.ArrayList<Integer> bolasSalidas = new java.util.ArrayList<>();
+			while (scPartida.hasNextInt()) {
+				bolasSalidas.add(scPartida.nextInt());
+			}
+			scPartida.close();
+
+			if (bolasSalidas.isEmpty()) {
+				System.out.println("\n[INFO] Todavia no ha salido ningun numero en la partida.");
+				return;
+			}
+
+			// 2. Leer las 27 lineas del carton actual
+			String[] lineasCarton = new String[27];
+			int indice = 0;
+			Scanner scCartonLectura = new Scanner(new File(rutaCarpeta + "\\carton.txt"));
+			while (scCartonLectura.hasNextLine() && indice < 27) {
+				lineasCarton[indice] = scCartonLectura.nextLine();
+				indice++;
+			}
+			scCartonLectura.close();
+
+			// 3. Cruzar los datos: revisar cada numero que salio y ver si esta en el carton
+			boolean huboAciertos = false;
+			for (int bola : bolasSalidas) {
+				for (int fila = 0; fila < 27; fila++) {
+					if (lineasCarton[fila] != null && !lineasCarton[fila].startsWith("-")) {
+						try {
+							int val = Integer.parseInt(lineasCarton[fila]);
+							if (val == bola) {
+								lineasCarton[fila] = "-" + val; // Tachar con '-'
+								huboAciertos = true;
+							}
+						} catch (NumberFormatException e) {
+							// Ignorar si no es un numero parseable
+						}
+					}
+				}
+			}
+
+			// 4. Guardar los cambios actualizados en carton.txt si hubo modificaciones
+			if (huboAciertos) {
+				PrintWriter pwCartonEscritura = new PrintWriter(new File(rutaCarpeta + "\\carton.txt"));
+				for (int fila = 0; fila < 27; fila++) {
+					if (lineasCarton[fila] != null) {
+						pwCartonEscritura.println(lineasCarton[fila]);
+					}
+				}
+				pwCartonEscritura.close();
+				System.out.println("\n[CORRECTO] Se han comprobado todos los numeros de la partida y se han tachado los aciertos en tu carton.");
+			} else {
+				System.out.println("\n[INFO] Se han revisado todos los numeros que han salido, pero ninguno coincide con tu carton.");
+			}
+
+		} catch (FileNotFoundException e) {
+			System.out.println("[ERROR] No se pudo encontrar alguno de los archivos para la comprobacion masiva.");
+		}
+	}
+
 	private static boolean comprobarLinea(String rutaCarpeta) {
-		boolean linea = false;
-		String contiene;
+		boolean lineaCompleta = false;
+		int lineasCorrectas = 0;
+		int lineasErroneas = 0;
 
 		try {
-			Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"));
 			Scanner scCarton = new Scanner(new File(rutaCarpeta + "\\carton.txt"));
-			while (scCarton.hasNextLine()) { // Lectura secuencial con hasNextLine
-				contiene = scCarton.nextLine();
-				if (contiene.startsWith("-") && PREGUNTAS_CORRECTAS >= 3) {
-					linea = true;
+			
+			// Leemos el carton agrupado en 3 filas (cada fila tiene 9 valores)
+			for (int i = 0; i < 3; i++) {
+				boolean filaEsLinea = true;
+				boolean tieneNumerosValidos = false;
+
+				for (int j = 0; j < 9; j++) {
+					if (scCarton.hasNextLine()) {
+						String valor = scCarton.nextLine();
+						// Si es un numero distinto de 0
+						if (!valor.equals("0")) {
+							tieneNumerosValidos = true;
+							// Para que la linea este correcta, el numero debe estar tachado con '-'
+							if (!valor.startsWith("-")) {
+								filaEsLinea = false;
+							}
+						}
+					}
 				}
-				if (!contiene.startsWith("-")) {
-					linea = false;
+
+				// Si la fila tenia numeros y todos estaban tachados, cuenta como linea correcta
+				if (tieneNumerosValidos && filaEsLinea) {
+					lineasCorrectas++;
+					lineaCompleta = true;
+				} else if (tieneNumerosValidos) {
+					lineasErroneas++;
 				}
 			}
-
-			if (linea) {
-				// Si hay bingo
-			} else if (!linea) {
-				// Si no hay bingo
-				System.out.println("[INFO] No puedes hacer linea, no esta completa");
-			} else {
-				System.out.println("[ERROR] Error desconocido");
-			}
-
-			scPartida.close();
 			scCarton.close();
-		} catch (FileNotFoundException e) {
 
+			// Guardar el resultado en el archivo comprobado.txt dentro de la carpeta del usuario
+			try (PrintWriter pwComprobado = new PrintWriter(new File(rutaCarpeta + "\\comprobado.txt"))) {
+				pwComprobado.println("Lineas completas: " + lineasCorrectas);
+				pwComprobado.println("Lineas sin completar: " + lineasErroneas);
+			}
+
+			if (lineaCompleta) {
+				System.out.println("\n[LINEA] Has completado al menos una linea correctamente!");
+				System.out.println("[LOG] Resultados guardados en comprobado.txt (Completas: " + lineasCorrectas + ", Sin completar: " + lineasErroneas + ")");
+			} else {
+				System.out.println("\n[INFO] Todavia no tienes ninguna linea completa.");
+				System.out.println("[LOG] Resultados guardados en comprobado.txt (Completas: " + lineasCorrectas + ", Sin completar: " + lineasErroneas + ")");
+			}
+
+		} catch (FileNotFoundException e) {
+			System.out.println("[ERROR] No se pudo encontrar el archivo carton.txt para comprobar la linea.");
 		}
 
-		return linea;
+		return lineaCompleta;
 	}
 
 	private static boolean comprobarBingo(String rutaCarpeta) {
@@ -233,9 +325,9 @@ public class ClienteBingo {
 				// Si hay bingo
 			} else if (!bingo) {
 				// Si no hay bingo
-				System.out.println("[INFO] No puedes hacer bingo, no esta completo");
+				System.out.println("[INFO] No puedes hacer bingo, no esta completo.");
 			} else {
-				System.out.println("[ERROR] Error desconocido");
+				System.out.println("[ERROR] Error desconocido.");
 			}
 
 			scPartida.close();
@@ -260,7 +352,7 @@ public class ClienteBingo {
 				}
 			}
 		} catch (FileNotFoundException e) {
-			System.out.println("[ERROR] No se pudo encontrar el archivo partida.txt");
+			System.out.println("[ERROR] No se pudo encontrar el archivo partida.txt.");
 			return;
 		}
 
@@ -320,7 +412,7 @@ public class ClienteBingo {
 			System.out.println(
 					"\n[CORRECTO] El numero " + numeroAComprobar + " estaba en tu carton y ha sido marcado con '-'.");
 		} catch (FileNotFoundException e) {
-			System.out.println("[ERROR] No se pudo actualizar el archivo carton.txt");
+			System.out.println("[ERROR] No se pudo actualizar el archivo carton.txt.");
 		}
 	}
 
