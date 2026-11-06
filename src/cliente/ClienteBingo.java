@@ -6,6 +6,8 @@ import java.util.Scanner;
 import java.io.FileNotFoundException;
 import java.util.Random;
 
+import preguntas.JuegoPreguntas;
+
 public class ClienteBingo {
 	public static final String RUTA_COMPARTIDA = "\\\\DESKTOP-V7J205P\\Reto-Almingo-Bingo";
 	public static final int PREGUNTAS_CORRECTAS = 0;
@@ -515,5 +517,13 @@ public class ClienteBingo {
 			}
 		}
 		return carton;
+	}
+	
+	private static boolean pregunta() {
+		boolean preguntaCorrecta = false;
+		Scanner sc = new Scanner(System.in);
+    	JuegoPreguntas juego = new JuegoPreguntas();
+    	juego.lanzarPregunta(sc);
+    	return preguntaCorrecta;
 	}
 }
