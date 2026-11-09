@@ -2,7 +2,6 @@
 
 ## Arreglar:
 - Hacer que solo salga una pregunta por cada linea.
-- Hacer salto de linea cada ciertos numeros.
 
 ## Hacer:
 - Comprobación automática por parte del servidor si un jugador gana.

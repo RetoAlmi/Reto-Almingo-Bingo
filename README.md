@@ -1,0 +1,88 @@
+# Almingo: Bingo
+
+## Indice
+1. [Sistema de archivos](#sistema-de-archivos)
+2. [Funcionamiento del Cliente](#funcionamiento-del-cliente)
+3. [Funcionamiento del Servidor](#funcionamiento-del-servidor)
+4. [Requisitos del Sistema](#requisitos-del-sistema)
+
+
+### 1. Sistema de archivos:
+Los archivos han sido separados en diferentes paquetes por su funcionalidad y organización.
+En el caso de los archivos para el cliente (la persona que jugaría al bingo), los archivos han sido agregados al paquete cliente para tener organizado todo lo que seria usado por parte del cliente mediante ``package cliente;``:
+**Paquete cliente:**
+> ClienteBingo.java
+> DatosPregunta.java
+> JuegoPreguntas.java
+
+Para el caso de el archivo del servidor (el programa que se ejecutaria para controlar la partida), ha sido agregado al paquete servidor mediante ``package servidor;``:
+**Paquete servidor:**
+> ServidorBingo.java
+
+---
+
+### 2. Funcionamiento del Cliente:
+En el cliente, hemos dividido el funcionamiento principal de las preguntas para poder tenerlo por separado.
+
+#### 2.1. Funcionamiento principal:
+El funcionamiento principal del código seria el archivo ClienteBingo.java.
+_[ClienteBingo.java](https://github.com/RetoAlmi/Reto-Almingo-Bingo/blob/main/src/cliente/ClienteBingo.java)_
+**Características principales:**
+- Identificación Única de Sesión (UID): Al iniciar el programa, se le solicita al usuario que introduzca su nombre. Al hacer esto, el programa genera automáticamente un UID para poder tener varios usuarios con el mismo nombre y evitar el problema de tener más de un usuario con el mismo nombre.
+- Generación del Cartón del Bingo: Después de crear el usuario, automáticamente un código genera el cartón del usuario de 3x9 con 5 números generados aleatoriamente entre el 1 y el 90 en cada fila. Para marcar los números vacíos, se utiliza el numero 0 ya que nunca aparece en el bingo.
+- Sincronización de Ficheros: El programa accede a la ruta compartida en ``\\DESKTOP-V7J205P\Reto-Almingo-Bingo`` para crear dentro de la carpeta "usuarios" una carpeta nueva con el nombre y UID del jugador, incluyendo dentro los archivos carton.txt, estadisticas.txt, preguntasHechas.txt, resultado.txt y uid.txt.
+- Sistema de Marcado de Números: En nuestro sistema de marcado de números, utilizamos el símbolo "-" por delante del numero para marcar los números que ya han salido en el bingo.
+- Herramientas de Administrador: Incluimos una herramienta que nos permite hacer una comprobación masiva de todos los números que han salido en el bingo.
+
+**Como funciona:**
+El funcionamiento del programa es simple:
+1. El programa pide nuestro nombre, con esto genera los archivos del usuario y su UID.
+2. Después de eso, el programa muestra el cartón del usuario, seguido de los números sacados del bingo (en el caso de que ya se haya sacado algún numero) y por ultimo aparece el menú de opciones.
+3. En el menú, aparecen 5 opciones:
+3.1. La primera seria comprobar el ultimo numero: En esta opción simplemente comprueba si han salido nuevos numeros.
+3.2. En la segunda opción, el usuario comprueba si tiene un numero en el cartón, introduciendo el numero de forma manual.
+3.3. En la tercera opcion, se comprueba si se a realizado una linea. En el caso de tener linea, se muestra la pregunta.
+3.4. En la cuarta opcion, se comprueba si el usuario a completado el bingo. En el caso de haberlo completado, se muestra una pregunta final y al responderla se finaliza la partida y muestra las estadisticas del usuario.
+3.5. En la quinta opcion, se le da al usuario la posibilidad de salir de la partida.
+3.6. En la sexta opción, es la opción de administrador mencionada anteriormente, por lo que permanece oculta.
+
+**Utilización de los archivos**
+- carton.txt: Aqui se guarda el carton completo del jugador y los numeros marcados.
+- estadisticas.txt: Aqui se guardan las estadisticas al finalizar la partida.
+- preguntasHechas.txt: Aqui se guardan cuantas preguntas se han respondido de forma correcta e incorrecta.
+- resultado.txt: En este archivo se agrega el texto "Victoria", el nombre del jugador y su UID cuando finaliza para avisar al servidor que se a terminado la partida.
+- uid.txt: En este archivo aparece en la primera línea el numero UID del usuario y, en la segunda línea, el nombre del jugador.
+
+
+#### 2.2. Funcionamiento de las preguntas:
+Las preguntas las realizamos en códigos a parte.
+
+_[DatosPregunta.java:](https://github.com/RetoAlmi/Reto-Almingo-Bingo/blob/main/src/cliente/DatosPregunta.java)_
+El archivo DatosPregunta.java para preparar las variables, llenarlas con las preguntas, respuestas y respuesta correcta para después comunicarse con el otro programa.
+
+_[JugarPreguntas.java:](https://github.com/RetoAlmi/Reto-Almingo-Bingo/blob/main/src/cliente/JugarPreguntas.java)_
+Después, el archivo JugarPreguntas.java es el código que lee las preguntas y las divide en partes, guardando cada opción en una variable diferente para tener las opciones de las preguntas separadas.
+
+---
+
+### 3. Funcionamiento del Servidor:
+En el servidor, controlamos el funcionamiento de la partida completa.
+
+#### 3.1. Que podemos hacer:
+En el menú del servidor, tenemos 10 opciones diferentes para controlar diferentes acciones:
+- En la primera opción, podemos iniciar una partida nueva.
+- En la segunda opción, sacamos números uno a uno de forma manual.
+- En la tercera opción, detectamos los clientes y listamos los cartones para visualizarlos.
+- En la cuarta opción, vemos cuantos usuarios hay registrados en la partida.
+- En la quinta opción, eliminamos los datos de todos los jugadores.
+- En la sexta opción, eliminamos los datos de la partida.
+- En la séptima opción, eliminamos los datos de todos los jugadores y los datos de la partida.
+- En la octava opción, comprobamos el estado de la partida para comprobar si hay algún ganador.
+- En la novena opción, sacamos todos los números.
+- En la decima opción, salimos/cerramos el servidor.
+
+#### 3.2. Archivos generados y sus funciones:
+Por parte del servidor, se generan diferentes archivos .txt para guardar diferentes datos:
+- partida.txt: Almacena en orden de aparición todas las bolas cantadas por el servidor (una por línea). Sirve para que los clientes sepan qué números han salido.
+- totalBolas.txt: Fichero de contadores rápidos. Contiene exactamente dos líneas: la primera indica el número total de _bolas sacadas_ hasta el momento, y la segunda las _bolas restantes_ hasta el momento (partiendo de 90).
+- estadoPartida.txt: Archivo de auditoría y registro de ganadores. Si el servidor detecta mediante la opción 8 que un jugador ha ganado (`resultado.txt`), escribe en este archivo un bloque detallando el ganador, la sesión y los datos del ganador.

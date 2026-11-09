@@ -15,8 +15,8 @@ public class ClienteBingo {
 		Scanner scTeclado = new Scanner(System.in);
 		Scanner scNumero = new Scanner(System.in);
 		int numeroIntroducido;
-		int maxCaracteresNombre = 13;
 		int minCaracteresNombre = 3;
+		int maxCaracteresNombre = 13;
 
 		System.out.println("=== CLIENTE DEL BINGO ALMINGO ===");
 		System.out.print("Introduce tu nombre: ");
