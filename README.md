@@ -1,4 +1,4 @@
-# Almingo: Bingo
+# Almingo - Bingo
 
 ## Indice
 1. [Sistema de archivos](#sistema-de-archivos)
@@ -46,7 +46,7 @@ El funcionamiento del programa es simple:
 3.5. En la quinta opcion, se le da al usuario la posibilidad de salir de la partida.
 3.6. En la sexta opción, es la opción de administrador mencionada anteriormente, por lo que permanece oculta.
 
-**Utilización de los archivos**
+**Utilización de los archivos:**
 - carton.txt: Aquí se guarda el cartón completo del jugador y los números marcados.
 - estadisticas.txt: Aqui se guardan las estadisticas al finalizar la partida.
 - preguntasHechas.txt: Aqui se guardan cuantas preguntas se han respondido de forma correcta e incorrecta.
@@ -86,3 +86,10 @@ Por parte del servidor, se generan diferentes archivos .txt para guardar diferen
 - partida.txt: Almacena en orden de aparición todas las bolas cantadas por el servidor (una por línea). Sirve para que los clientes sepan qué números han salido.
 - totalBolas.txt: Fichero de contadores rápidos. Contiene exactamente dos líneas: la primera indica el número total de _bolas sacadas_ hasta el momento, y la segunda las _bolas restantes_ hasta el momento (partiendo de 90).
 - estadoPartida.txt: Archivo de auditoría y registro de ganadores. Si el servidor detecta mediante la opción 8 que un jugador ha ganado (`resultado.txt`), escribe en este archivo un bloque detallando el ganador, la sesión y los datos del ganador.
+
+---
+
+Requisitos del Sistema
+- **Java Development Kit (JDK):** Versión 8 o superior.
+- **Java Development Kit (JDK) Recomendado:** Versión 21 o superior.
+- **Entorno de Red:** Acceso a la ruta de red compartida configurada en la constante `RUTA_COMPARTIDA`: ``java public static final String RUTA_COMPARTIDA = "\\\\DESKTOP-V7J205P\\Reto-Almingo-Bingo";``
