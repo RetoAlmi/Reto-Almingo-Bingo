@@ -6,8 +6,6 @@ import java.util.Scanner;
 import java.io.FileNotFoundException;
 import java.util.Random;
 
-import preguntas.JuegoPreguntas;
-
 public class ClienteBingo {
 	public static final String RUTA_COMPARTIDA = "\\\\DESKTOP-V7J205P\\Reto-Almingo-Bingo";
 	public static int PREGUNTAS_CORRECTAS = 0;
@@ -126,24 +124,7 @@ public class ClienteBingo {
 			}
 
 			// Mostrar los numeros que han salido hasta ahora en partida.txt
-			System.out.println("\nNumeros que ya han salido:");
-			try (Scanner scBolasSalidas = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"))) {
-				boolean primero = true;
-				int saltoLinea;
-				while (scBolasSalidas.hasNext()) {
-					if (!primero) {
-						System.out.print(", ");
-					}
-					System.out.print(scBolasSalidas.next());
-					primero = false;
-				}
-				if (primero) {
-					System.out.print("Ninguno todavia.");
-				}
-				System.out.println();
-			} catch (FileNotFoundException e) {
-				System.out.println("Ninguno todavia.");
-			}
+			numerosSacados();
 
 			System.out.println("\n=== MENU ===");
 			System.out.println("1. Comprobar ultimo numero");
@@ -607,5 +588,38 @@ public class ClienteBingo {
 		JuegoPreguntas juego = new JuegoPreguntas();
 		preguntaCorrecta = juego.lanzarPregunta(sc);
 		return preguntaCorrecta;
+	}
+	
+	private static void numerosSacados() {
+		System.out.println("\nNumeros que ya han salido:");
+		try (Scanner scBolasSalidas = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"))) {
+			boolean primero = true;
+			int contadorBolas = 0;
+			
+			while (scBolasSalidas.hasNext()) {
+				String numero = scBolasSalidas.next();
+				
+				if (!primero) {
+					System.out.print(", ");
+				}
+				
+				System.out.print(numero);
+				primero = false;
+				contadorBolas++;
+				
+				// Cada 10 numeros, hacemos un salto de linea
+				if (contadorBolas % 30 == 0) {
+					System.out.println();
+					primero = true; // Para que el siguiente numero de la nueva linea no empiece con coma
+				}
+			}
+			
+			if (primero && contadorBolas == 0) {
+				System.out.print("Ninguno todavia.");
+			}
+			System.out.println();
+		} catch (FileNotFoundException e) {
+			System.out.println("Ninguno todavia.");
+		}
 	}
 }

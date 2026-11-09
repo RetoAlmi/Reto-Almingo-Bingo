@@ -1,4 +1,4 @@
-package preguntas;
+package cliente;
 
 public class DatosPregunta { // este programa basicamente prepara las variables para llenarlas con las
 								// preguntas, se colocan los getters para comunicarse con el otro programa

@@ -1,4 +1,4 @@
-package preguntas;
+package cliente;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
