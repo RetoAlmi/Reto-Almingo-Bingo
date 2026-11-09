@@ -15,7 +15,7 @@ En el caso de los archivos para el cliente (la persona que jugaría al bingo), l
 > DatosPregunta.java
 > JuegoPreguntas.java
 
-Para el caso de el archivo del servidor (el programa que se ejecutaria para controlar la partida), ha sido agregado al paquete servidor mediante ``package servidor;``:
+Para el caso de el archivo del servidor (el programa que se ejecutaría para controlar la partida), ha sido agregado al paquete servidor mediante ``package servidor;``:
 **Paquete servidor:**
 > ServidorBingo.java
 
@@ -39,15 +39,15 @@ El funcionamiento del programa es simple:
 1. El programa pide nuestro nombre, con esto genera los archivos del usuario y su UID.
 2. Después de eso, el programa muestra el cartón del usuario, seguido de los números sacados del bingo (en el caso de que ya se haya sacado algún numero) y por ultimo aparece el menú de opciones.
 3. En el menú, aparecen 5 opciones:
-3.1. La primera seria comprobar el ultimo numero: En esta opción simplemente comprueba si han salido nuevos numeros.
+3.1. La primera seria comprobar el ultimo numero: En esta opción simplemente comprueba si han salido nuevos números.
 3.2. En la segunda opción, el usuario comprueba si tiene un numero en el cartón, introduciendo el numero de forma manual.
-3.3. En la tercera opcion, se comprueba si se a realizado una linea. En el caso de tener linea, se muestra la pregunta.
-3.4. En la cuarta opcion, se comprueba si el usuario a completado el bingo. En el caso de haberlo completado, se muestra una pregunta final y al responderla se finaliza la partida y muestra las estadisticas del usuario.
+3.3. En la tercera opción, se comprueba si se a realizado una línea. En el caso de tener línea, se muestra la pregunta.
+3.4. En la cuarta opción, se comprueba si el usuario a completado el bingo. En el caso de haberlo completado, se muestra una pregunta final y al responderla se finaliza la partida y muestra las estadísticas del usuario.
 3.5. En la quinta opcion, se le da al usuario la posibilidad de salir de la partida.
 3.6. En la sexta opción, es la opción de administrador mencionada anteriormente, por lo que permanece oculta.
 
 **Utilización de los archivos**
-- carton.txt: Aqui se guarda el carton completo del jugador y los numeros marcados.
+- carton.txt: Aquí se guarda el cartón completo del jugador y los números marcados.
 - estadisticas.txt: Aqui se guardan las estadisticas al finalizar la partida.
 - preguntasHechas.txt: Aqui se guardan cuantas preguntas se han respondido de forma correcta e incorrecta.
 - resultado.txt: En este archivo se agrega el texto "Victoria", el nombre del jugador y su UID cuando finaliza para avisar al servidor que se a terminado la partida.
