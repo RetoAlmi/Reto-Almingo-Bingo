@@ -84,12 +84,12 @@ public class ClienteBingo {
 			System.out.println("Error al guardar el carton.");
 		}
 
-		// Esperar 3 segundos para ver la informacion del usuario
 		try {
 			for (int cuentaAtras = 3; cuentaAtras > 0; cuentaAtras--) {
 				System.out.print(cuentaAtras + "... ");
 				Thread.sleep(1000);
 			}
+			System.out.println();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -145,7 +145,10 @@ public class ClienteBingo {
 			if (opcion == 1) {
 				System.out.println("[LOG] Comprobando numeros...");
 				try {
-					Thread.sleep(1000);
+					for (int cuentaAtras = 1; cuentaAtras > 0; cuentaAtras--) {
+						System.out.print(cuentaAtras + "... ");
+						Thread.sleep(1000);
+					}
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -157,10 +160,8 @@ public class ClienteBingo {
 				System.out.print("[NUMERO] Introduce el numero para comprobar: ");
 				int numero = scNumero.nextInt();
 				comprobarNumero(numero, rutaCarpeta);
-
-				// Esperar 3 segundos para ver la informacion del usuario
 				try {
-					for (int cuentaAtras = 3; cuentaAtras > 0; cuentaAtras--) {
+					for (int cuentaAtras = 1; cuentaAtras > 0; cuentaAtras--) {
 						System.out.print(cuentaAtras + "... ");
 						Thread.sleep(1000);
 					}
@@ -174,8 +175,6 @@ public class ClienteBingo {
 				// Comprobar linea
 				boolean linea = false;
 				linea = comprobarLinea(rutaCarpeta);
-
-				// Esperar 3 segundos para ver la informacion del usuario
 				try {
 					for (int cuentaAtras = 3; cuentaAtras > 0; cuentaAtras--) {
 						System.out.print(cuentaAtras + "... ");
@@ -191,8 +190,18 @@ public class ClienteBingo {
 				// Comprobar bingo
 				boolean bingo = false;
 				bingo = comprobarBingo(rutaCarpeta, nombre, uid);
-
-				opcion = 0;
+				if (bingo) {
+					opcion = 0;
+				}
+				try {
+					for (int cuentaAtras = 3; cuentaAtras > 0; cuentaAtras--) {
+						System.out.print(cuentaAtras + "... ");
+						Thread.sleep(1000);
+					}
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 
 			else if (opcion == 10) {
@@ -284,15 +293,28 @@ public class ClienteBingo {
 		int lineasCorrectas = 0;
 		int lineasErroneas = 0;
 
+		// 1. Cargar que filas ya han tenido su pregunta respondida anteriormente
+		File fLineasRespondidas = new File(rutaCarpeta + "\\lineasRespondidas.txt");
+		java.util.HashSet<Integer> filasRespondidas = new java.util.HashSet<>();
+		if (fLineasRespondidas.exists()) {
+			try (Scanner scResp = new Scanner(fLineasRespondidas)) {
+				while (scResp.hasNextInt()) {
+					filasRespondidas.add(scResp.nextInt());
+				}
+			} catch (FileNotFoundException e) {
+				// Ignorar si no existe todavia
+			}
+		}
+
 		try {
 			Scanner scCarton = new Scanner(new File(rutaCarpeta + "\\carton.txt"));
 
 			// Leemos el carton agrupado en 3 filas (cada fila tiene 9 valores)
-			for (int i = 0; i < 3; i++) {
+			for (int fila = 0; fila < 3; fila++) {
 				boolean filaEsLinea = true;
 				boolean tieneNumerosValidos = false;
 
-				for (int j = 0; j < 9; j++) {
+				for (int columna = 0; columna < 9; columna++) {
 					if (scCarton.hasNextLine()) {
 						String valor = scCarton.nextLine();
 						// Si es un numero distinto de 0
@@ -311,23 +333,35 @@ public class ClienteBingo {
 					lineasCorrectas++;
 					lineaCompleta = true;
 
-					// Realizar pregunta
-					boolean respuestaCorrecta = false;
-					respuestaCorrecta = realizarPregunta();
-					if (respuestaCorrecta) {
-						PREGUNTAS_CORRECTAS++;
-						System.out.println("[INFO] Respuesta correcta.\n");
-					} else if (!respuestaCorrecta) {
-						PREGUNTAS_FALLIDAS++;
-						System.out.println("[INFO] Respuesta erronea.\n");
-					} else {
-						System.out.println("[ERROR] Error al obtener la respuesta si es correcta o erronea.");
+					// SOLO realizar la pregunta si esta fila especifica NO ha sido preguntada antes
+					if (!filasRespondidas.contains(fila)) {
+						System.out.println(
+								"\n[INFO] Has completado la Fila " + (fila + 1) + "! Debes responder una pregunta:");
+						boolean respuestaCorrecta = realizarPregunta();
+						if (respuestaCorrecta) {
+							PREGUNTAS_CORRECTAS++;
+							System.out.println("[INFO] Respuesta correcta.\n");
+						} else {
+							PREGUNTAS_FALLIDAS++;
+							System.out.println("[INFO] Respuesta erronea.\n");
+						}
+						// Marcar esta fila como ya respondida
+						filasRespondidas.add(fila);
 					}
 				} else if (tieneNumerosValidos) {
 					lineasErroneas++;
 				}
 			}
 			scCarton.close();
+
+			// Actualizar el registro de filas ya respondidas en el archivo
+			try (PrintWriter pwResp = new PrintWriter(fLineasRespondidas)) {
+				for (int filaID : filasRespondidas) {
+					pwResp.println(filaID);
+				}
+			} catch (FileNotFoundException e) {
+				System.out.println("[ERROR] No se pudo actualizar lineasRespondidas.txt");
+			}
 
 			// Guardar el resultado en el archivo comprobado.txt dentro de la carpeta del
 			// usuario
@@ -337,7 +371,7 @@ public class ClienteBingo {
 			}
 
 			if (lineaCompleta) {
-				System.out.println("\n[LINEA] Has completado al menos una linea correctamente!");
+				System.out.println("\n[LINEA] Tienes lineas completas en tu carton.");
 				System.out.println("[LOG] Resultados guardados en comprobado.txt (Completas: " + lineasCorrectas
 						+ ", Sin completar: " + lineasErroneas + ")");
 			} else {
@@ -589,31 +623,31 @@ public class ClienteBingo {
 		preguntaCorrecta = juego.lanzarPregunta(sc);
 		return preguntaCorrecta;
 	}
-	
+
 	private static void numerosSacados() {
 		System.out.println("\nNumeros que ya han salido:");
 		try (Scanner scBolasSalidas = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"))) {
 			boolean primero = true;
 			int contadorBolas = 0;
-			
+
 			while (scBolasSalidas.hasNext()) {
 				String numero = scBolasSalidas.next();
-				
+
 				if (!primero) {
 					System.out.print(", ");
 				}
-				
+
 				System.out.print(numero);
 				primero = false;
 				contadorBolas++;
-				
+
 				// Cada 10 numeros, hacemos un salto de linea
 				if (contadorBolas % 30 == 0) {
 					System.out.println();
 					primero = true; // Para que el siguiente numero de la nueva linea no empiece con coma
 				}
 			}
-			
+
 			if (primero && contadorBolas == 0) {
 				System.out.print("Ninguno todavia.");
 			}

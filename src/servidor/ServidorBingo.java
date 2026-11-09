@@ -214,34 +214,11 @@ public class ServidorBingo {
 			}
 			
 			else if (opcion == 9) {
-				int bolaNueva;
-				boolean encontrado;
+				// Leer cuantos salidos y restantes hay actualmente
 				int totalSalidos = 0;
 				int totalRestantes = 90;
-
-				// 1. Generar numero aleatorio y comprobar que no este en partida.txt
-				do {
-					bolaNueva = rnd.nextInt(1, 91);
-					encontrado = false;
-
-					try (Scanner lector = new Scanner(new File(RUTA_PARTIDA))) {
-						while (lector.hasNextInt()) {
-							int numeroArchivo = lector.nextInt();
-							if (numeroArchivo == bolaNueva) {
-								encontrado = true;
-								break;
-							}
-						}
-					} catch (FileNotFoundException e) {
-						// Si el archivo no existe todavia, asumimos que no esta
-					}
-
-				} while (encontrado); // Repite si el numero fue encontrado en el archivo
-
-				int bola = bolaNueva; // Asignamos el numero valido definitivo
-
-				// 2. Leer cuantas bolas han salido y cuantas quedan en totalBolas.txt
 				File fTotalBolas = new File(RUTA_TOTAL_BOLAS);
+				
 				if (fTotalBolas.exists()) {
 					try (Scanner scLectura = new Scanner(fTotalBolas)) {
 						if (scLectura.hasNextInt()) {
@@ -251,40 +228,69 @@ public class ServidorBingo {
 							totalRestantes = scLectura.nextInt();
 						}
 					} catch (FileNotFoundException e) {
-						// Ignorar si ocurre algun error de lectura
+						// Ignorar
 					}
 				}
 
-				totalSalidos++;
-				totalRestantes--;
+				if (totalRestantes <= 0) {
+					System.out.println("\n[INFO] Ya han salido todas las bolas del bombo.");
+				} else {
+					System.out.println("\n[INFO] Sacando todas las bolas restantes...");
+					
+					// Bucle para sacar todas las bolas que faltan hasta completar las 90
+					while (totalRestantes > 0) {
+						int bolaNueva;
+						boolean encontrado;
 
-				// 3. Guardar el nuevo numero en partida.txt (aniadiendolo en una nueva linea)
-				File fPartida = new File(RUTA_PARTIDA);
-				try {
-					// Usamos FileOutputStream con 'true' para hacer append (aniadir en la siguiente
-					// linea)
-					PrintWriter pwEscritura = new PrintWriter(new FileOutputStream(fPartida, true));
-					pwEscritura.println(bola);
-					pwEscritura.close();
+						// 1. Generar numero aleatorio y comprobar que no este en partida.txt
+						do {
+							bolaNueva = rnd.nextInt(1, 91);
+							encontrado = false;
 
-					// Mostramos el mensaje
-					System.out.println(
-							"\n[INFO] El numero " + bola + " no estaba en el archivo y ha sido registrado con exito.");
-				} catch (FileNotFoundException e) {
-					System.out.println("Error al actualizar la partida.");
-				}
+							try (Scanner lector = new Scanner(new File(RUTA_PARTIDA))) {
+								while (lector.hasNextInt()) {
+									int numeroArchivo = lector.nextInt();
+									if (numeroArchivo == bolaNueva) {
+										encontrado = true;
+										break;
+									}
+								}
+							} catch (FileNotFoundException e) {
+								// Si el archivo no existe todavia, asumimos que no esta
+							}
 
-				// 4. Actualizar los contadores en totalBolas.txt
-				try {
-					PrintWriter pwTotalBolas = new PrintWriter(fTotalBolas);
-					pwTotalBolas.println(totalSalidos);
-					pwTotalBolas.println(totalRestantes);
-					pwTotalBolas.close();
+						} while (encontrado);
 
+						int bola = bolaNueva;
+						totalSalidos++;
+						totalRestantes--;
+
+						// 2. Guardar el nuevo numero en partida.txt (haciendo append)
+						File fPartida = new File(RUTA_PARTIDA);
+						try {
+							PrintWriter pwEscritura = new PrintWriter(new FileOutputStream(fPartida, true));
+							pwEscritura.println(bola);
+							pwEscritura.close();
+						} catch (FileNotFoundException e) {
+							System.out.println("Error al actualizar la partida.");
+							break;
+						}
+
+						// 3. Actualizar los contadores en totalBolas.txt en cada iteracion
+						try {
+							PrintWriter pwTotalBolas = new PrintWriter(fTotalBolas);
+							pwTotalBolas.println(totalSalidos);
+							pwTotalBolas.println(totalRestantes);
+							pwTotalBolas.close();
+						} catch (FileNotFoundException e) {
+							System.out.println("Error al actualizar totalBolas.txt.");
+							break;
+						}
+					}
+
+					System.out.println("[INFO] Se han sacado todas las bolas restantes con exito.");
 					System.out.println("Bolas sacadas: " + totalSalidos);
 					System.out.println("Bolas restantes: " + totalRestantes);
-				} catch (FileNotFoundException e) {
-					System.out.println("Error al actualizar totalBolas.txt.");
 				}
 			}
 
