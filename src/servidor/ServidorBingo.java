@@ -31,8 +31,8 @@ public class ServidorBingo {
 			System.out.println("7. Eliminar estado de la partida");
 			System.out.println("8. Eliminar todos los datos");
 			System.out.println("9. Comprobar estado de la partida");
-			System.out.println("-> Para comprobar si hay algun ganador.");
-			System.out.println("-> En el caso de que haya un ganador, se finalizara la partida.");
+			System.out.println("   -> Para comprobar si hay algun ganador.");
+			System.out.println("   -> En el caso de que haya un ganador, se finalizara la partida.");
 			System.out.println("10. Sacar todas las bolas");
 			System.out.println("0. Salir del Servidor");
 			System.out.print("Selecciona una opcion: ");

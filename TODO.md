@@ -1,8 +1,6 @@
 # TODO
 
 ## Hacer:
-- Comprobación automática por parte del servidor si un jugador gana.
-- Comprobación automática por parte del cliente para terminar la partida en el caso de que alguien gane.
 - Comprobación automática de los nuevos números.
 
 ## Repaso:
