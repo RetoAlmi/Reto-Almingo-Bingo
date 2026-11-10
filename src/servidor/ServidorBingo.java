@@ -336,10 +336,18 @@ public class ServidorBingo {
 
 	public static void eliminarPartida() {
 		File partidaArchivo = new File(RUTA_PARTIDA);
-
 		if (partidaArchivo.exists()) {
 			partidaArchivo.delete();
 			System.out.println("\n[INFO] Se ha borrado el archivo 'partida.txt' de la red con exito!");
+
+		} else {
+			System.out.println("\n[INFO] No hay carpeta de usuarios que vaciar.");
+		}
+		
+		File estadoPartidaArchivo = new File(RUTA_ESTADO_PARTIDA);
+		if (estadoPartidaArchivo.exists()) {
+			estadoPartidaArchivo.delete();
+			System.out.println("\n[INFO] Se ha borrado el archivo 'estadoPartida.txt' de la red con exito!");
 
 		} else {
 			System.out.println("\n[INFO] No hay carpeta de usuarios que vaciar.");
@@ -373,6 +381,22 @@ public class ServidorBingo {
 
 		boolean hayGanador = false;
 
+		// Leer el contenido actual de estadoPartida.txt para evitar duplicar usuarios
+		// ya registrados
+		String contenidoEstadoActual = "";
+		File fEstado = new File(RUTA_ESTADO_PARTIDA);
+		if (fEstado.exists()) {
+			try (Scanner scEstActual = new Scanner(fEstado)) {
+				StringBuilder sb = new StringBuilder();
+				while (scEstActual.hasNextLine()) {
+					sb.append(scEstActual.nextLine()).append("\n");
+				}
+				contenidoEstadoActual = sb.toString();
+			} catch (FileNotFoundException e) {
+				// Ignorar
+			}
+		}
+
 		// Recorrer todas las subcarpetas de los usuarios
 		for (File carpetaUsuario : listaCarpetas) {
 			if (carpetaUsuario.isDirectory()) {
@@ -385,7 +409,6 @@ public class ServidorBingo {
 							String primeraLinea = scResultado.nextLine();
 							// Comprobar si la primera linea contiene "Victoria"
 							if (primeraLinea.contains("Victoria")) {
-								hayGanador = true;
 
 								// Leer nombre y uid del archivo resultado.txt
 								String nombreUsuario = "Desconocido";
@@ -396,6 +419,16 @@ public class ServidorBingo {
 								if (scResultado.hasNextLine()) {
 									uidUsuario = scResultado.nextLine().trim();
 								}
+
+								// Identificador unico para comprobar si ya esta registrado
+								String identificadorUnico = "UID: " + nombreUsuario + "-" + uidUsuario;
+
+								// Si el usuario ya esta escrito en estadoPartida.txt, saltamos al siguiente
+								if (contenidoEstadoActual.contains(identificadorUnico)) {
+									continue;
+								}
+
+								hayGanador = true;
 
 								// Leer estadisticas desde estadisticas.txt si existe
 								String correctas = "0";
@@ -419,12 +452,11 @@ public class ServidorBingo {
 									}
 								}
 
-								// Construir el formato solicitado
+								// Construir el formato exacto solicitado
 								StringBuilder contenidoResultado = new StringBuilder();
 								contenidoResultado.append("========- VICTORIA -========\n");
 								contenidoResultado.append("Nombre: ").append(nombreUsuario).append("\n");
-								contenidoResultado.append("UID: ").append(nombreUsuario).append("-").append(uidUsuario)
-										.append("\n");
+								contenidoResultado.append(identificadorUnico).append("\n");
 								contenidoResultado.append("----------------------------\n");
 								contenidoResultado.append("Respuestas correctas: ").append(correctas).append("\n");
 								contenidoResultado.append("Respuestas incorrectas: ").append(incorrectas).append("\n");
@@ -432,7 +464,7 @@ public class ServidorBingo {
 										.append("\n");
 								contenidoResultado.append("============================\n\n");
 
-								File fEstado = new File(RUTA_ESTADO_PARTIDA);
+								// Escribir en estadoPartida.txt
 								try (PrintWriter pwEstado = new PrintWriter(new FileOutputStream(fEstado, true))) {
 									pwEstado.print(contenidoResultado.toString());
 								}
@@ -454,7 +486,8 @@ public class ServidorBingo {
 			System.out.println(
 					"[INFO] Se ha finalizado la partida actual debido a que hay un ganador. Datos guardados en estadoPartida.txt.");
 		} else {
-			System.out.println("\n[INFO] Comprobacion finalizada. Ningun usuario ha conseguido la victoria todavia.");
+			System.out.println(
+					"\n[INFO] Comprobacion finalizada. Ningun usuario nuevo ha conseguido la victoria todavia.");
 		}
 	}
 }
