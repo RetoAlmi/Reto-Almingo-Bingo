@@ -56,6 +56,7 @@ public class ServidorBingo {
 				} catch (FileNotFoundException e) {
 					System.out.println("Error al inicializar la partida.");
 				}
+				comprobarEstadoPartida();
 
 			}
 
@@ -114,8 +115,8 @@ public class ServidorBingo {
 						pwEscritura.println(bola);
 						pwEscritura.close();
 
-						System.out.println(
-								"\n[INFO] El numero " + bola + " no estaba en el archivo y ha sido registrado con exito.");
+						System.out.println("\n[INFO] El numero " + bola
+								+ " no estaba en el archivo y ha sido registrado con exito.");
 					} catch (FileNotFoundException e) {
 						System.out.println("Error al actualizar la partida.");
 					}
@@ -133,7 +134,7 @@ public class ServidorBingo {
 						System.out.println("Error al actualizar totalBolas.txt.");
 					}
 				}
-
+				comprobarEstadoPartida();
 			}
 
 			else if (opcion == 3) {
@@ -173,7 +174,7 @@ public class ServidorBingo {
 						}
 					}
 				}
-
+				comprobarEstadoPartida();
 			}
 
 			else if (opcion == 4) {
@@ -191,8 +192,10 @@ public class ServidorBingo {
 					}
 				}
 				System.out.println("\n[INFO] Numero total de usuarios conectados/registrados: " + contadorUsuarios);
+				comprobarEstadoPartida();
+			}
 
-			} else if (opcion == 5) {
+			else if (opcion == 5) {
 				eliminarUsuarios();
 
 			}
@@ -207,17 +210,17 @@ public class ServidorBingo {
 				eliminarPartida();
 				eliminarTotalBolas();
 			}
-			
+
 			else if (opcion == 8) {
 				comprobarEstadoPartida();
 			}
-			
+
 			else if (opcion == 9) {
 				// Leer cuantos salidos y restantes hay actualmente
 				int totalSalidos = 0;
 				int totalRestantes = 90;
 				File fTotalBolas = new File(RUTA_TOTAL_BOLAS);
-				
+
 				if (fTotalBolas.exists()) {
 					try (Scanner scLectura = new Scanner(fTotalBolas)) {
 						if (scLectura.hasNextInt()) {
@@ -235,7 +238,7 @@ public class ServidorBingo {
 					System.out.println("\n[INFO] Ya han salido todas las bolas del bombo.");
 				} else {
 					System.out.println("\n[INFO] Sacando todas las bolas restantes...");
-					
+
 					// Bucle para sacar todas las bolas que faltan hasta completar las 90
 					while (totalRestantes > 0) {
 						int bolaNueva;
@@ -291,6 +294,7 @@ public class ServidorBingo {
 					System.out.println("Bolas sacadas: " + totalSalidos);
 					System.out.println("Bolas restantes: " + totalRestantes);
 				}
+				comprobarEstadoPartida();
 			}
 
 			else if (opcion == 0) {
@@ -353,7 +357,7 @@ public class ServidorBingo {
 			System.out.println("\n[INFO] No hay carpeta de usuarios que vaciar.");
 		}
 	}
-	
+
 	public static void comprobarEstadoPartida() {
 		File dirUsuarios = new File(RUTA_USUARIOS);
 		if (!dirUsuarios.exists() || !dirUsuarios.isDirectory()) {
@@ -373,7 +377,8 @@ public class ServidorBingo {
 		for (File carpetaUsuario : listaCarpetas) {
 			if (carpetaUsuario.isDirectory()) {
 				File fResultado = new File(carpetaUsuario, "resultado.txt");
-				
+				File fEstadisticas = new File(carpetaUsuario, "estadisticas.txt");
+
 				if (fResultado.exists()) {
 					try (Scanner scResultado = new Scanner(fResultado)) {
 						if (scResultado.hasNextLine()) {
@@ -381,25 +386,64 @@ public class ServidorBingo {
 							// Comprobar si la primera linea contiene "Victoria"
 							if (primeraLinea.contains("Victoria")) {
 								hayGanador = true;
-								
-								StringBuilder contenidoResultado = new StringBuilder();
-								contenidoResultado.append("=== GANADOR EN: ").append(carpetaUsuario.getName()).append(" ===\n");
-								contenidoResultado.append(primeraLinea).append("\n");
-								while (scResultado.hasNextLine()) {
-									contenidoResultado.append(scResultado.nextLine()).append("\n");
+
+								// Leer nombre y uid del archivo resultado.txt
+								String nombreUsuario = "Desconocido";
+								String uidUsuario = "0";
+								if (scResultado.hasNextLine()) {
+									nombreUsuario = scResultado.nextLine().trim();
 								}
-								contenidoResultado.append("=========================================\n\n");
+								if (scResultado.hasNextLine()) {
+									uidUsuario = scResultado.nextLine().trim();
+								}
+
+								// Leer estadisticas desde estadisticas.txt si existe
+								String correctas = "0";
+								String incorrectas = "0";
+								String bolasSacadas = "0";
+
+								if (fEstadisticas.exists()) {
+									try (Scanner scEst = new Scanner(fEstadisticas)) {
+										while (scEst.hasNextLine()) {
+											String lineaEst = scEst.nextLine().trim();
+											if (lineaEst.startsWith("Bolas totales sacadas:")) {
+												bolasSacadas = lineaEst.replace("Bolas totales sacadas:", "").trim();
+											} else if (lineaEst.startsWith("Preguntas correctas:")) {
+												correctas = lineaEst.replace("Preguntas correctas:", "").trim();
+											} else if (lineaEst.startsWith("Preguntas fallidas:")) {
+												incorrectas = lineaEst.replace("Preguntas fallidas:", "").trim();
+											}
+										}
+									} catch (FileNotFoundException e) {
+										// Ignorar
+									}
+								}
+
+								// Construir el formato solicitado
+								StringBuilder contenidoResultado = new StringBuilder();
+								contenidoResultado.append("========- VICTORIA -========\n");
+								contenidoResultado.append("Nombre: ").append(nombreUsuario).append("\n");
+								contenidoResultado.append("UID: ").append(nombreUsuario).append("-").append(uidUsuario)
+										.append("\n");
+								contenidoResultado.append("----------------------------\n");
+								contenidoResultado.append("Respuestas correctas: ").append(correctas).append("\n");
+								contenidoResultado.append("Respuestas incorrectas: ").append(incorrectas).append("\n");
+								contenidoResultado.append("Cantidad de bolas sacadas: ").append(bolasSacadas)
+										.append("\n");
+								contenidoResultado.append("============================\n\n");
 
 								File fEstado = new File(RUTA_ESTADO_PARTIDA);
 								try (PrintWriter pwEstado = new PrintWriter(new FileOutputStream(fEstado, true))) {
 									pwEstado.print(contenidoResultado.toString());
 								}
 
-								System.out.println("\n[VICTORIA DETECTADA] El usuario de la carpeta '" + carpetaUsuario.getName() + "' ha ganado.");
+								System.out.println("\n[VICTORIA DETECTADA] El usuario de la carpeta '"
+										+ carpetaUsuario.getName() + "' ha ganado.");
 							}
 						}
 					} catch (FileNotFoundException e) {
-						System.out.println("[ERROR] No se pudo leer el archivo de resultado del usuario: " + carpetaUsuario.getName());
+						System.out.println("[ERROR] No se pudo leer el archivo de resultado del usuario: "
+								+ carpetaUsuario.getName());
 					}
 				}
 			}
@@ -407,7 +451,8 @@ public class ServidorBingo {
 
 		if (hayGanador) {
 			eliminarPartida();
-			System.out.println("[INFO] Se ha finalizado la partida actual debido a que hay un ganador. Datos guardados en estadoPartida.txt.");
+			System.out.println(
+					"[INFO] Se ha finalizado la partida actual debido a que hay un ganador. Datos guardados en estadoPartida.txt.");
 		} else {
 			System.out.println("\n[INFO] Comprobacion finalizada. Ningun usuario ha conseguido la victoria todavia.");
 		}

@@ -113,6 +113,12 @@ public class ClienteBingo {
 				System.out.println("[ERROR] No se pudo leer el carton para mostrarlo.");
 			}
 
+			boolean ganador = false;
+			ganador = hayGanador();
+			if (ganador) {
+				break;
+			}
+
 			// Imprimir el carton 3x9 por pantalla actualizado
 			System.out.println("\n=== TU CARTON DE BINGO ===");
 			for (int fila = 0; fila < 3; fila++) {
@@ -391,6 +397,26 @@ public class ClienteBingo {
 		boolean bingoCompleto = true;
 		boolean tieneNumeros = false;
 
+		// 1. Verificar si se han respondido las 3 preguntas de las lineas previamente
+		File fLineasRespondidas = new File(rutaCarpeta + "\\lineasRespondidas.txt");
+		int filasRespondidasTotal = 0;
+		if (fLineasRespondidas.exists()) {
+			try (Scanner scResp = new Scanner(fLineasRespondidas)) {
+				while (scResp.hasNextInt()) {
+					scResp.nextInt();
+					filasRespondidasTotal++;
+				}
+			} catch (FileNotFoundException e) {
+				// Ignorar
+			}
+		}
+
+		if (filasRespondidasTotal < 3) {
+			System.out.println(
+					"\n[ALERTA] No puedes cantar bingo todavia. Debes completar y responder las preguntas de las 3 lineas primero.");
+			return false;
+		}
+
 		try {
 			Scanner scCarton = new Scanner(new File(rutaCarpeta + "\\carton.txt"));
 
@@ -415,7 +441,7 @@ public class ClienteBingo {
 			}
 
 			if (bingoCompleto) {
-				// Realizar pregunta
+				// Realizar pregunta final de bingo
 				boolean respuestaCorrecta = false;
 				respuestaCorrecta = realizarPregunta();
 				if (respuestaCorrecta) {
@@ -655,5 +681,35 @@ public class ClienteBingo {
 		} catch (FileNotFoundException e) {
 			System.out.println("Ninguno todavia.");
 		}
+	}
+
+	private static boolean hayGanador() {
+		boolean ganador = false;
+		File fEstado = new File(RUTA_COMPARTIDA + "\\estadoPartida.txt");
+
+		if (fEstado.exists() && fEstado.length() > 0) {
+			try (Scanner scEstado = new Scanner(fEstado)) {
+				if (scEstado.hasNextLine()) {
+					String primeraLinea = scEstado.nextLine().trim();
+					// Comprobar si la primera linea empieza con el caracter "="
+					if (primeraLinea.startsWith("=")) {
+						ganador = true;
+
+						System.out.println("\n[AVISO] ¡Se ha detectado un ganador en la partida!");
+						System.out.println("=== CONTENIDO DE ESTADO DE PARTIDA ===");
+						System.out.println(primeraLinea);
+
+						// Mostrar el resto del contenido del archivo
+						while (scEstado.hasNextLine()) {
+							System.out.println(scEstado.nextLine());
+						}
+					}
+				}
+			} catch (FileNotFoundException e) {
+				System.out.println("[ERROR] No se pudo leer el archivo estadoPartida.txt.");
+			}
+		}
+
+		return ganador;
 	}
 }
