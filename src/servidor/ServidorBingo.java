@@ -60,34 +60,12 @@ public class ServidorBingo {
 			}
 
 			else if (opcion == 2) {
-				for (int bolise = 0; bolise < 90; bolise++) {
 				int bolaNueva;
 				boolean encontrado;
 				int totalSalidos = 0;
 				int totalRestantes = 90;
 
-				// 1. Generar numero aleatorio y comprobar que no este en partida.txt
-				do {
-					bolaNueva = rnd.nextInt(1, 91);
-					encontrado = false;
-
-					try (Scanner lector = new Scanner(new File(RUTA_PARTIDA))) {
-						while (lector.hasNextInt()) {
-							int numeroArchivo = lector.nextInt();
-							if (numeroArchivo == bolaNueva) {
-								encontrado = true;
-								break;
-							}
-						}
-					} catch (FileNotFoundException e) {
-						// Si el archivo no existe todavia, asumimos que no esta
-					}
-
-				} while (encontrado); // Repite si el numero fue encontrado en el archivo
-
-				int bola = bolaNueva; // Asignamos el numero valido definitivo
-
-				// 2. Leer cuantas bolas han salido y cuantas quedan en totalBolas.txt
+				// 1. Leer cuantas bolas han salido y cuantas quedan en totalBolas.txt
 				File fTotalBolas = new File(RUTA_TOTAL_BOLAS);
 				if (fTotalBolas.exists()) {
 					try (Scanner scLectura = new Scanner(fTotalBolas)) {
@@ -102,37 +80,58 @@ public class ServidorBingo {
 					}
 				}
 
-				totalSalidos++;
-				totalRestantes--;
+				if (totalRestantes <= 0) {
+					System.out.println("\n[INFO] Ya han salido todas las bolas del bombo.");
+				} else {
+					// 2. Generar numero aleatorio y comprobar que no este en partida.txt
+					do {
+						bolaNueva = rnd.nextInt(1, 91);
+						encontrado = false;
 
-				// 3. Guardar el nuevo numero en partida.txt (aniadiendolo en una nueva linea)
-				File fPartida = new File(RUTA_PARTIDA);
-				try {
-					// Usamos FileOutputStream con 'true' para hacer append (aniadir en la siguiente
-					// linea)
-					PrintWriter pwEscritura = new PrintWriter(new FileOutputStream(fPartida, true));
-					pwEscritura.println(bola);
-					pwEscritura.close();
+						try (Scanner lector = new Scanner(new File(RUTA_PARTIDA))) {
+							while (lector.hasNextInt()) {
+								int numeroArchivo = lector.nextInt();
+								if (numeroArchivo == bolaNueva) {
+									encontrado = true;
+									break;
+								}
+							}
+						} catch (FileNotFoundException e) {
+							// Si el archivo no existe todavia, asumimos que no esta
+						}
 
-					// Mostramos el mensaje
-					System.out.println(
-							"\n[INFO] El numero " + bola + " no estaba en el archivo y ha sido registrado con exito.");
-				} catch (FileNotFoundException e) {
-					System.out.println("Error al actualizar la partida.");
-				}
+					} while (encontrado); // Repite si el numero fue encontrado en el archivo
 
-				// 4. Actualizar los contadores en totalBolas.txt
-				try {
-					PrintWriter pwTotalBolas = new PrintWriter(fTotalBolas);
-					pwTotalBolas.println(totalSalidos);
-					pwTotalBolas.println(totalRestantes);
-					pwTotalBolas.close();
+					int bola = bolaNueva; // Asignamos el numero valido definitivo
 
-					System.out.println("Bolas sacadas: " + totalSalidos);
-					System.out.println("Bolas restantes: " + totalRestantes);
-				} catch (FileNotFoundException e) {
-					System.out.println("Error al actualizar totalBolas.txt.");
-				}
+					totalSalidos++;
+					totalRestantes--;
+
+					// 3. Guardar el nuevo numero en partida.txt (aniadiendolo en una nueva linea)
+					File fPartida = new File(RUTA_PARTIDA);
+					try {
+						PrintWriter pwEscritura = new PrintWriter(new FileOutputStream(fPartida, true));
+						pwEscritura.println(bola);
+						pwEscritura.close();
+
+						System.out.println(
+								"\n[INFO] El numero " + bola + " no estaba en el archivo y ha sido registrado con exito.");
+					} catch (FileNotFoundException e) {
+						System.out.println("Error al actualizar la partida.");
+					}
+
+					// 4. Actualizar los contadores en totalBolas.txt
+					try {
+						PrintWriter pwTotalBolas = new PrintWriter(fTotalBolas);
+						pwTotalBolas.println(totalSalidos);
+						pwTotalBolas.println(totalRestantes);
+						pwTotalBolas.close();
+
+						System.out.println("Bolas sacadas: " + totalSalidos);
+						System.out.println("Bolas restantes: " + totalRestantes);
+					} catch (FileNotFoundException e) {
+						System.out.println("Error al actualizar totalBolas.txt.");
+					}
 				}
 
 			}
@@ -373,8 +372,6 @@ public class ServidorBingo {
 		// Recorrer todas las subcarpetas de los usuarios
 		for (File carpetaUsuario : listaCarpetas) {
 			if (carpetaUsuario.isDirectory()) {
-				// Buscamos el archivo de resultado/comprobacion del cliente
-				// (Puedes cambiar "resultado.txt" por el nombre exacto que genere tu cliente, ej: "comprobado.txt")
 				File fResultado = new File(carpetaUsuario, "resultado.txt");
 				
 				if (fResultado.exists()) {
@@ -385,7 +382,6 @@ public class ServidorBingo {
 							if (primeraLinea.contains("Victoria")) {
 								hayGanador = true;
 								
-								// Leer todo el contenido del archivo resultado.txt
 								StringBuilder contenidoResultado = new StringBuilder();
 								contenidoResultado.append("=== GANADOR EN: ").append(carpetaUsuario.getName()).append(" ===\n");
 								contenidoResultado.append(primeraLinea).append("\n");
@@ -394,13 +390,12 @@ public class ServidorBingo {
 								}
 								contenidoResultado.append("=========================================\n\n");
 
-								// Escribir/añadir todo el contenido a RUTA_ESTADO_PARTIDA
 								File fEstado = new File(RUTA_ESTADO_PARTIDA);
 								try (PrintWriter pwEstado = new PrintWriter(new FileOutputStream(fEstado, true))) {
 									pwEstado.print(contenidoResultado.toString());
 								}
 
-								System.out.println("\n[VICTORIA DETECTADA!] El usuario de la carpeta '" + carpetaUsuario.getName() + "' ha ganado.");
+								System.out.println("\n[VICTORIA DETECTADA] El usuario de la carpeta '" + carpetaUsuario.getName() + "' ha ganado.");
 							}
 						}
 					} catch (FileNotFoundException e) {
@@ -411,7 +406,6 @@ public class ServidorBingo {
 		}
 
 		if (hayGanador) {
-			// Finalizar la partida vaciando o eliminando partida.txt
 			eliminarPartida();
 			System.out.println("[INFO] Se ha finalizado la partida actual debido a que hay un ganador. Datos guardados en estadoPartida.txt.");
 		} else {
