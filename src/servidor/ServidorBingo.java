@@ -28,11 +28,12 @@ public class ServidorBingo {
 			System.out.println("4. Ver cuantos usuarios hay registrados");
 			System.out.println("5. Eliminar todos los usuarios");
 			System.out.println("6. Eliminar datos de la partida");
-			System.out.println("7. Eliminar todos los datos");
-			System.out.println("8. Comprobar estado de la partida");
+			System.out.println("7. Eliminar estado de la partida");
+			System.out.println("8. Eliminar todos los datos");
+			System.out.println("9. Comprobar estado de la partida");
 			System.out.println("-> Para comprobar si hay algun ganador.");
 			System.out.println("-> En el caso de que haya un ganador, se finalizara la partida.");
-			System.out.println("9. Sacar todas las bolas");
+			System.out.println("10. Sacar todas las bolas");
 			System.out.println("0. Salir del Servidor");
 			System.out.print("Selecciona una opcion: ");
 
@@ -204,18 +205,23 @@ public class ServidorBingo {
 				eliminarPartida();
 				eliminarTotalBolas();
 			}
-
+			
 			else if (opcion == 7) {
-				eliminarUsuarios();
-				eliminarPartida();
-				eliminarTotalBolas();
+				eliminarEstadoPartida();
 			}
 
 			else if (opcion == 8) {
-				comprobarEstadoPartida();
+				eliminarUsuarios();
+				eliminarPartida();
+				eliminarTotalBolas();
+				eliminarEstadoPartida();
 			}
 
 			else if (opcion == 9) {
+				comprobarEstadoPartida();
+			}
+
+			else if (opcion == 10) {
 				// Leer cuantos salidos y restantes hay actualmente
 				int totalSalidos = 0;
 				int totalRestantes = 90;
@@ -343,7 +349,9 @@ public class ServidorBingo {
 		} else {
 			System.out.println("\n[INFO] No hay carpeta de usuarios que vaciar.");
 		}
-		
+	}
+	
+	public static void eliminarEstadoPartida() {
 		File estadoPartidaArchivo = new File(RUTA_ESTADO_PARTIDA);
 		if (estadoPartidaArchivo.exists()) {
 			estadoPartidaArchivo.delete();
