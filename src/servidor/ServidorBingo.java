@@ -482,7 +482,6 @@ public class ServidorBingo {
 		}
 
 		if (hayGanador) {
-			eliminarPartida();
 			System.out.println(
 					"[INFO] Se ha finalizado la partida actual debido a que hay un ganador. Datos guardados en estadoPartida.txt.");
 		} else {
