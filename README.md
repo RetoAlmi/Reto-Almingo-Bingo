@@ -74,10 +74,10 @@ En el menú del servidor, tenemos 10 opciones diferentes para controlar diferent
 - En la segunda opción, sacamos números uno a uno de forma manual.
 - En la tercera opción, detectamos los clientes y listamos los cartones para visualizarlos.
 - En la cuarta opción, vemos cuantos usuarios hay registrados en la partida.
-- En la quinta opción, eliminamos los datos de todos los jugadores.
-- En la sexta opción, eliminamos los datos de la partida.
+- En la quinta opción, eliminamos los archivos de todos los jugadores.
+- En la sexta opción, eliminamos los archivos de la partida.
 - En la séptima opción, eliminamos el estado de la partida donde aparece si alguien a ganado la partida.
-- En la octava opción, eliminamos los datos de todos los jugadores y los datos de la partida.
+- En la octava opción, eliminamos los archivos de todos los jugadores y los datos de la partida.
 - En la novena opción, comprobamos el estado de la partida para comprobar si hay algún ganador.
 - En la decima opción, sacamos todos los números.
 - En la undecima opción, salimos/cerramos el servidor.

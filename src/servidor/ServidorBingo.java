@@ -1,5 +1,6 @@
 package servidor;
 
+import java.io.Console;
 import java.io.File;
 import java.io.FileOutputStream; // Necesario para aniadir al archivo sin sobrescribir
 import java.io.PrintWriter;
@@ -18,6 +19,15 @@ public class ServidorBingo {
 		Scanner scTeclado = new Scanner(System.in);
 		int opcion = 0;
 		Random rnd = new Random();
+		
+		
+		// Eliminar los datos al iniciar la partida
+		System.out.println("[LOG] Eliminando todos los arhcivos...");
+		eliminarUsuarios();
+		eliminarPartida();
+		eliminarTotalBolas();
+		eliminarEstadoPartida();
+		
 
 		// Bucle do...while para que el servidor no se cierre y repita el menu
 		do {
@@ -27,9 +37,9 @@ public class ServidorBingo {
 			System.out.println("3. Detectar y listar cartones de los clientes");
 			System.out.println("4. Ver cuantos usuarios hay registrados");
 			System.out.println("5. Eliminar todos los usuarios");
-			System.out.println("6. Eliminar datos de la partida");
+			System.out.println("6. Eliminar archivos de la partida");
 			System.out.println("7. Eliminar estado de la partida");
-			System.out.println("8. Eliminar todos los datos");
+			System.out.println("8. Eliminar todos los archivos");
 			System.out.println("9. Comprobar estado de la partida");
 			System.out.println("   -> Para comprobar si hay algun ganador.");
 			System.out.println("   -> En el caso de que haya un ganador, se finalizara la partida.");
