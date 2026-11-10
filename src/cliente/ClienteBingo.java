@@ -230,7 +230,7 @@ public class ClienteBingo {
 		scNumero.close();
 	}
 
-	private static void comprobarTodosLosNumeros(String rutaCarpeta) {
+	public static void comprobarTodosLosNumeros(String rutaCarpeta) {
 		try {
 			// 1. Leer todas las bolas que han salido en partida.txt
 			Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"));
@@ -294,7 +294,7 @@ public class ClienteBingo {
 		}
 	}
 
-	private static boolean comprobarLinea(String rutaCarpeta) {
+	public static boolean comprobarLinea(String rutaCarpeta) {
 		boolean lineaCompleta = false;
 		int lineasCorrectas = 0;
 		int lineasErroneas = 0;
@@ -393,7 +393,7 @@ public class ClienteBingo {
 		return lineaCompleta;
 	}
 
-	private static boolean comprobarBingo(String rutaCarpeta, String nombre, int uid) {
+	public static boolean comprobarBingo(String rutaCarpeta, String nombre, int uid) {
 		boolean bingoCompleto = true;
 		boolean tieneNumeros = false;
 
@@ -508,7 +508,7 @@ public class ClienteBingo {
 		return bingoCompleto;
 	}
 
-	private static void comprobarNumero(int numeroAComprobar, String rutaCarpeta) {
+	public static void comprobarNumero(int numeroAComprobar, String rutaCarpeta) {
 		boolean estaEnPartida = false;
 
 		// 1. Comprobar si el numero introducido esta en partida.txt
@@ -585,7 +585,7 @@ public class ClienteBingo {
 		}
 	}
 
-	private static int generarUid() {
+	public static int generarUid() {
 		int uid;
 		Random rnd = new Random();
 
@@ -596,7 +596,7 @@ public class ClienteBingo {
 
 	// Metodo auxiliar para generar el carton con numeros totalmente aleatorios (del
 	// 1 al 90) sin repetir
-	private static int[][] generarCartonCliente() {
+	public static int[][] generarCartonCliente() {
 		int[][] carton = new int[3][9];
 		Random rnd = new Random();
 
@@ -641,7 +641,7 @@ public class ClienteBingo {
 		return carton;
 	}
 
-	private static boolean realizarPregunta() {
+	public static boolean realizarPregunta() {
 		boolean preguntaCorrecta = false;
 		System.out.println();
 		Scanner sc = new Scanner(System.in);
@@ -650,7 +650,7 @@ public class ClienteBingo {
 		return preguntaCorrecta;
 	}
 
-	private static void numerosSacados() {
+	public static void numerosSacados() {
 		System.out.println("\nNumeros que ya han salido:");
 		try (Scanner scBolasSalidas = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"))) {
 			boolean primero = true;
@@ -683,7 +683,7 @@ public class ClienteBingo {
 		}
 	}
 
-	private static boolean hayGanador() {
+	public static boolean hayGanador() {
 		boolean ganador = false;
 		File fEstado = new File(RUTA_COMPARTIDA + "\\estadoPartida.txt");
 
