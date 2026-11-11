@@ -14,7 +14,6 @@ public class ClienteBingo {
 	public static void main(String[] args) {
 		Scanner scTeclado = new Scanner(System.in);
 		Scanner scNumero = new Scanner(System.in);
-		int numeroIntroducido;
 		int minCaracteresNombre = 3;
 		int maxCaracteresNombre = 13;
 
@@ -50,7 +49,7 @@ public class ClienteBingo {
 			PrintWriter pwId = new PrintWriter(new File(dirJugador, "uid" + ".txt"));
 			pwId.println(uid);
 			pwId.println(nombre);
-			pwId.close(); // Cerrar fichero segun la teoria
+			pwId.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("[ERROR] Error al guardar el identificador.");
 		}
@@ -66,15 +65,15 @@ public class ClienteBingo {
 					pwCarton.println(carton[fila][columna]);
 				}
 			}
-			pwCarton.close(); // Cerrar fichero
+			pwCarton.close();
 
-			// Crear archivo para guardar las preguntas hechas
+			// Crear archivos auxiliares vacios
 			PrintWriter pwPreguntas = new PrintWriter(new File(dirJugador, "preguntasHechas.txt"));
 			pwPreguntas.close();
 
-			// Crear archivo para guardar el resultado final y sus estadisticas
 			PrintWriter pwResultado = new PrintWriter(new File(dirJugador, "resultado.txt"));
 			pwResultado.close();
+
 			PrintWriter pwEstadisticas = new PrintWriter(new File(dirJugador, "estadisticas.txt"));
 			pwEstadisticas.close();
 
@@ -91,15 +90,20 @@ public class ClienteBingo {
 			}
 			System.out.println();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		int opcion = 0;
 		do {
+			// Comprobar al inicio de cada iteracion si hay un ganador registrado por el
+			// servidor
+			if (hayGanador()) {
+				System.out.println("\n[INFO] La partida ha finalizado. Saliendo del cliente...");
+				break;
+			}
+
 			// Recargar el carton desde el archivo para reflejar los numeros tachados con
 			// '-'
-			// (Usamos una matriz de String para poder mostrar los numeros con el guion)
 			String[][] cartonVisual = new String[3][9];
 			try (Scanner scRecarga = new Scanner(new File(rutaCarpeta + "\\carton.txt"))) {
 				for (int fila = 0; fila < 3; fila++) {
@@ -111,12 +115,6 @@ public class ClienteBingo {
 				}
 			} catch (FileNotFoundException e) {
 				System.out.println("[ERROR] No se pudo leer el carton para mostrarlo.");
-			}
-
-			boolean ganador = false;
-			ganador = hayGanador();
-			if (ganador) {
-				break;
 			}
 
 			// Imprimir el carton 3x9 por pantalla actualizado
@@ -155,14 +153,13 @@ public class ClienteBingo {
 						System.out.print(cuentaAtras + "... ");
 						Thread.sleep(1000);
 					}
+					System.out.println();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 
 			else if (opcion == 2) {
-				// Leer los numeros que han salido en partida.txt para comprobar aciertos
 				System.out.print("[NUMERO] Introduce el numero para comprobar: ");
 				int numero = scNumero.nextInt();
 				comprobarNumero(numero, rutaCarpeta);
@@ -171,48 +168,43 @@ public class ClienteBingo {
 						System.out.print(cuentaAtras + "... ");
 						Thread.sleep(1000);
 					}
+					System.out.println();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 
 			else if (opcion == 3) {
-				// Comprobar linea
-				boolean linea = false;
-				linea = comprobarLinea(rutaCarpeta);
+				comprobarLinea(rutaCarpeta);
 				try {
 					for (int cuentaAtras = 3; cuentaAtras > 0; cuentaAtras--) {
 						System.out.print(cuentaAtras + "... ");
 						Thread.sleep(1000);
 					}
+					System.out.println();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 
 			else if (opcion == 4) {
-				// Comprobar bingo
-				boolean bingo = false;
-				bingo = comprobarBingo(rutaCarpeta, nombre, uid);
+				boolean bingo = comprobarBingo(rutaCarpeta, nombre, uid);
 				if (bingo) {
-					opcion = 0;
+					opcion = 0; // Salir del bucle tras cantar bingo con exito
 				}
 				try {
 					for (int cuentaAtras = 3; cuentaAtras > 0; cuentaAtras--) {
 						System.out.print(cuentaAtras + "... ");
 						Thread.sleep(1000);
 					}
+					System.out.println();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 
 			else if (opcion == 10) {
-				// Opcion oculta para comprobar todos los numeros que han salido en partida.txt
-				System.out.println("[ADMIN] Comprobancion automatica de todos los numeros.");
+				System.out.println("[ADMIN] Comprobacion automatica de todos los numeros.");
 				comprobarTodosLosNumeros(rutaCarpeta);
 				System.out.println("[ADMIN] Todos los numeros comprobados.");
 			}
@@ -232,7 +224,6 @@ public class ClienteBingo {
 
 	public static void comprobarTodosLosNumeros(String rutaCarpeta) {
 		try {
-			// 1. Leer todas las bolas que han salido en partida.txt
 			Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"));
 			java.util.ArrayList<Integer> bolasSalidas = new java.util.ArrayList<>();
 			while (scPartida.hasNextInt()) {
@@ -245,7 +236,6 @@ public class ClienteBingo {
 				return;
 			}
 
-			// 2. Leer las 27 lineas del carton actual
 			String[] lineasCarton = new String[27];
 			int indice = 0;
 			Scanner scCartonLectura = new Scanner(new File(rutaCarpeta + "\\carton.txt"));
@@ -255,7 +245,6 @@ public class ClienteBingo {
 			}
 			scCartonLectura.close();
 
-			// 3. Cruzar los datos: revisar cada numero que salio y ver si esta en el carton
 			boolean huboAciertos = false;
 			for (int bola : bolasSalidas) {
 				for (int fila = 0; fila < 27; fila++) {
@@ -263,17 +252,16 @@ public class ClienteBingo {
 						try {
 							int val = Integer.parseInt(lineasCarton[fila]);
 							if (val == bola) {
-								lineasCarton[fila] = "-" + val; // Tachar con '-'
+								lineasCarton[fila] = "-" + val;
 								huboAciertos = true;
 							}
 						} catch (NumberFormatException e) {
-							// Ignorar si no es un numero parseable
+							// Ignorar
 						}
 					}
 				}
 			}
 
-			// 4. Guardar los cambios actualizados en carton.txt si hubo modificaciones
 			if (huboAciertos) {
 				PrintWriter pwCartonEscritura = new PrintWriter(new File(rutaCarpeta + "\\carton.txt"));
 				for (int fila = 0; fila < 27; fila++) {
@@ -282,11 +270,9 @@ public class ClienteBingo {
 					}
 				}
 				pwCartonEscritura.close();
-				System.out.println(
-						"\n[CORRECTO] Se han comprobado todos los numeros de la partida y se han tachado los aciertos en tu carton.");
+				System.out.println("\n[CORRECTO] Se han comprobado todos los numeros y se han tachado los aciertos.");
 			} else {
-				System.out.println(
-						"\n[INFO] Se han revisado todos los numeros que han salido, pero ninguno coincide con tu carton.");
+				System.out.println("\n[INFO] Se han revisado los numeros, pero ninguno coincide con tu carton.");
 			}
 
 		} catch (FileNotFoundException e) {
@@ -299,7 +285,6 @@ public class ClienteBingo {
 		int lineasCorrectas = 0;
 		int lineasErroneas = 0;
 
-		// 1. Cargar que filas ya han tenido su pregunta respondida anteriormente
 		File fLineasRespondidas = new File(rutaCarpeta + "\\lineasRespondidas.txt");
 		java.util.HashSet<Integer> filasRespondidas = new java.util.HashSet<>();
 		if (fLineasRespondidas.exists()) {
@@ -308,14 +293,13 @@ public class ClienteBingo {
 					filasRespondidas.add(scResp.nextInt());
 				}
 			} catch (FileNotFoundException e) {
-				// Ignorar si no existe todavia
+				// Ignorar
 			}
 		}
 
 		try {
 			Scanner scCarton = new Scanner(new File(rutaCarpeta + "\\carton.txt"));
 
-			// Leemos el carton agrupado en 3 filas (cada fila tiene 9 valores)
 			for (int fila = 0; fila < 3; fila++) {
 				boolean filaEsLinea = true;
 				boolean tieneNumerosValidos = false;
@@ -323,10 +307,8 @@ public class ClienteBingo {
 				for (int columna = 0; columna < 9; columna++) {
 					if (scCarton.hasNextLine()) {
 						String valor = scCarton.nextLine();
-						// Si es un numero distinto de 0
 						if (!valor.equals("0")) {
 							tieneNumerosValidos = true;
-							// Para que la linea este correcta, el numero debe estar tachado con '-'
 							if (!valor.startsWith("-")) {
 								filaEsLinea = false;
 							}
@@ -334,12 +316,10 @@ public class ClienteBingo {
 					}
 				}
 
-				// Si la fila tenia numeros y todos estaban tachados, cuenta como linea correcta
 				if (tieneNumerosValidos && filaEsLinea) {
 					lineasCorrectas++;
 					lineaCompleta = true;
 
-					// SOLO realizar la pregunta si esta fila especifica NO ha sido preguntada antes
 					if (!filasRespondidas.contains(fila)) {
 						System.out.println(
 								"\n[INFO] Has completado la Fila " + (fila + 1) + "! Debes responder una pregunta:");
@@ -351,7 +331,6 @@ public class ClienteBingo {
 							PREGUNTAS_FALLIDAS++;
 							System.out.println("[INFO] Respuesta erronea.\n");
 						}
-						// Marcar esta fila como ya respondida
 						filasRespondidas.add(fila);
 					}
 				} else if (tieneNumerosValidos) {
@@ -360,7 +339,6 @@ public class ClienteBingo {
 			}
 			scCarton.close();
 
-			// Actualizar el registro de filas ya respondidas en el archivo
 			try (PrintWriter pwResp = new PrintWriter(fLineasRespondidas)) {
 				for (int filaID : filasRespondidas) {
 					pwResp.println(filaID);
@@ -369,8 +347,6 @@ public class ClienteBingo {
 				System.out.println("[ERROR] No se pudo actualizar lineasRespondidas.txt");
 			}
 
-			// Guardar el resultado en el archivo comprobado.txt dentro de la carpeta del
-			// usuario
 			try (PrintWriter pwComprobado = new PrintWriter(new File(rutaCarpeta + "\\comprobado.txt"))) {
 				pwComprobado.println("Lineas completas: " + lineasCorrectas);
 				pwComprobado.println("Lineas sin completar: " + lineasErroneas);
@@ -378,12 +354,8 @@ public class ClienteBingo {
 
 			if (lineaCompleta) {
 				System.out.println("\n[LINEA] Tienes lineas completas en tu carton.");
-				System.out.println("[LOG] Resultados guardados en comprobado.txt (Completas: " + lineasCorrectas
-						+ ", Sin completar: " + lineasErroneas + ")");
 			} else {
 				System.out.println("\n[INFO] Todavia no tienes ninguna linea completa.");
-				System.out.println("[LOG] Resultados guardados en comprobado.txt (Completas: " + lineasCorrectas
-						+ ", Sin completar: " + lineasErroneas + ")");
 			}
 
 		} catch (FileNotFoundException e) {
@@ -397,7 +369,6 @@ public class ClienteBingo {
 		boolean bingoCompleto = true;
 		boolean tieneNumeros = false;
 
-		// 1. Verificar si se han respondido las 3 preguntas de las lineas previamente
 		File fLineasRespondidas = new File(rutaCarpeta + "\\lineasRespondidas.txt");
 		int filasRespondidasTotal = 0;
 		if (fLineasRespondidas.exists()) {
@@ -420,13 +391,10 @@ public class ClienteBingo {
 		try {
 			Scanner scCarton = new Scanner(new File(rutaCarpeta + "\\carton.txt"));
 
-			// Leer todo el carton (27 valores: 3 filas x 9 columnas)
 			while (scCarton.hasNextLine()) {
 				String valor = scCarton.nextLine();
-				// Si encontramos un valor que no sea 0
 				if (!valor.equals("0")) {
 					tieneNumeros = true;
-					// Si algun numero valido NO esta tachado con '-', entonces no hay bingo
 					if (!valor.startsWith("-")) {
 						bingoCompleto = false;
 						break;
@@ -435,27 +403,20 @@ public class ClienteBingo {
 			}
 			scCarton.close();
 
-			// Si el carton estaba vacio (raro, pero preventivo)
 			if (!tieneNumeros) {
 				bingoCompleto = false;
 			}
 
 			if (bingoCompleto) {
-				// Realizar pregunta final de bingo
-				boolean respuestaCorrecta = false;
-				respuestaCorrecta = realizarPregunta();
+				boolean respuestaCorrecta = realizarPregunta();
 				if (respuestaCorrecta) {
 					PREGUNTAS_CORRECTAS++;
 					System.out.println("[INFO] Respuesta correcta.\n");
-				} else if (!respuestaCorrecta) {
+				} else {
 					PREGUNTAS_FALLIDAS++;
 					System.out.println("[INFO] Respuesta erronea.\n");
-				} else {
-					System.out.println("[ERROR] Error al obtener la respuesta si es correcta o erronea.");
 				}
 
-				// Calcular estadisticas: contar cuantas bolas han salido en total de
-				// partida.txt
 				int totalBolasPartida = 0;
 				try (Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"))) {
 					while (scPartida.hasNextInt()) {
@@ -463,37 +424,31 @@ public class ClienteBingo {
 						totalBolasPartida++;
 					}
 				} catch (FileNotFoundException e) {
-					// Ignorar si no existe
+					// Ignorar
 				}
 
 				System.out.println("=== PARTIDA FINALIZADA ===");
 				System.out.println("[BINGO] Felicidades! Has completado todo el carton correctamente.");
-				System.out.println(
-						"[INFO] El estado y estadisticas se han guardado en comprobado.txt. Partida finalizada!");
 
-				// Mostrar estadisticas por pantalla
 				System.out.println("\n=== ESTADISTICAS DE LA PARTIDA ===");
 				System.out.println("- Bolas totales sacadas en la partida: " + totalBolasPartida);
 				System.out.println("- Preguntas correctas: " + PREGUNTAS_CORRECTAS);
 				System.out.println("- Preguntas fallidas: " + PREGUNTAS_FALLIDAS);
 
-				// Guardar las estadisticas en el archivo estadisticas.txt
-				try (PrintWriter pwComprobado = new PrintWriter(new File(rutaCarpeta + "\\estadisticas.txt"))) {
-					pwComprobado.println("BINGO: COMPLETO Y CORRECTO!");
-					pwComprobado.println("=== ESTADISTICAS ===");
-					pwComprobado.println("Bolas totales sacadas: " + totalBolasPartida);
-					pwComprobado.println("Preguntas correctas: " + PREGUNTAS_CORRECTAS);
-					pwComprobado.println("Preguntas fallidas: " + PREGUNTAS_FALLIDAS);
+				try (PrintWriter pwEst = new PrintWriter(new File(rutaCarpeta + "\\estadisticas.txt"))) {
+					pwEst.println("BINGO: COMPLETO Y CORRECTO!");
+					pwEst.println("=== ESTADISTICAS ===");
+					pwEst.println("Bolas totales sacadas: " + totalBolasPartida);
+					pwEst.println("Preguntas correctas: " + PREGUNTAS_CORRECTAS);
+					pwEst.println("Preguntas fallidas: " + PREGUNTAS_FALLIDAS);
 				}
 
-				// Guardar el resultado en el archivo resultado.txt
-				try (PrintWriter pwComprobado = new PrintWriter(new File(rutaCarpeta + "\\resultado.txt"))) {
-					pwComprobado.println("Victoria");
-					pwComprobado.println(nombre);
-					pwComprobado.println(uid);
+				try (PrintWriter pwRes = new PrintWriter(new File(rutaCarpeta + "\\resultado.txt"))) {
+					pwRes.println("Victoria");
+					pwRes.println(nombre);
+					pwRes.println(uid);
 				}
 			} else {
-				// Guardar estado incompleto en comprobado.txt
 				try (PrintWriter pwComprobado = new PrintWriter(new File(rutaCarpeta + "\\comprobado.txt"))) {
 					pwComprobado.println("BINGO: Incompleto");
 				}
@@ -511,7 +466,6 @@ public class ClienteBingo {
 	public static void comprobarNumero(int numeroAComprobar, String rutaCarpeta) {
 		boolean estaEnPartida = false;
 
-		// 1. Comprobar si el numero introducido esta en partida.txt
 		try (Scanner scPartida = new Scanner(new File(RUTA_COMPARTIDA + "\\partida.txt"))) {
 			while (scPartida.hasNextInt()) {
 				int bolaPartida = scPartida.nextInt();
@@ -530,10 +484,6 @@ public class ClienteBingo {
 			return;
 		}
 
-		// 2. Si esta en partida, leemos el carton actual (guardado en formato de 27
-		// lineas o matriz)
-		// Como carton.txt guarda los 27 elementos secuencialmente (3 filas x 9
-		// columnas), los cargamos:
 		String[] lineasCarton = new String[27];
 		boolean encontradoEnCarton = false;
 		int indice = 0;
@@ -548,19 +498,16 @@ public class ClienteBingo {
 			return;
 		}
 
-		// 3. Buscar el numero en el carton y anteponer el "-" si coincide
 		for (int fila = 0; fila < 27; fila++) {
-			// Comparamos si la linea coincide con el numero (ignorando si ya tiene un guion
-			// previo)
 			if (lineasCarton[fila] != null && !lineasCarton[fila].startsWith("-")) {
 				try {
 					int val = Integer.parseInt(lineasCarton[fila]);
 					if (val == numeroAComprobar) {
-						lineasCarton[fila] = "-" + val; // Se le agrega el "-" por delante
+						lineasCarton[fila] = "-" + val;
 						encontradoEnCarton = true;
 					}
 				} catch (NumberFormatException e) {
-					// Si ya contiene un guion u otro caracter, se ignora
+					// Ignorar
 				}
 			}
 		}
@@ -571,7 +518,6 @@ public class ClienteBingo {
 			return;
 		}
 
-		// 4. Reescribir el archivo carton.txt con el numero tachado (-)
 		try (PrintWriter pwCartonEscritura = new PrintWriter(new File(rutaCarpeta + "\\carton.txt"))) {
 			for (int fila = 0; fila < 27; fila++) {
 				if (lineasCarton[fila] != null) {
@@ -586,38 +532,28 @@ public class ClienteBingo {
 	}
 
 	public static int generarUid() {
-		int uid;
 		Random rnd = new Random();
-
-		uid = rnd.nextInt(100, 99999);
-
-		return uid;
+		return rnd.nextInt(100, 99999);
 	}
 
-	// Metodo auxiliar para generar el carton con numeros totalmente aleatorios (del
-	// 1 al 90) sin repetir
 	public static int[][] generarCartonCliente() {
 		int[][] carton = new int[3][9];
 		Random rnd = new Random();
 
-		// Inicializar el carton a 0 (12 huecos vacios en total, 4 por fila)
 		for (int fila = 0; fila < 3; fila++) {
 			for (int columna = 0; columna < 9; columna++) {
 				carton[fila][columna] = 0;
 			}
 		}
 
-		// Rellenar cada fila para que tenga exactamente 5 numeros
 		for (int fila = 0; fila < 3; fila++) {
 			int numerosColocados = 0;
 			while (numerosColocados < 5) {
-				int columna = rnd.nextInt(9); // Columna aleatoria (0 al 8) donde se colocara el numero
+				int columna = rnd.nextInt(9);
 
 				if (carton[fila][columna] == 0) {
-					// Generar un numero completamente aleatorio entre 1 y 90
 					int num = rnd.nextInt(1, 91);
 
-					// Comprobar que el numero NO se repita en todo el carton
 					boolean repetidoEnCarton = false;
 					for (int f = 0; f < 3; f++) {
 						for (int c = 0; c < 9; c++) {
@@ -630,7 +566,6 @@ public class ClienteBingo {
 							break;
 					}
 
-					// Si no este repetido, se asigna a esa posicion
 					if (!repetidoEnCarton) {
 						carton[fila][columna] = num;
 						numerosColocados++;
@@ -642,12 +577,10 @@ public class ClienteBingo {
 	}
 
 	public static boolean realizarPregunta() {
-		boolean preguntaCorrecta = false;
 		System.out.println();
 		Scanner sc = new Scanner(System.in);
 		JuegoPreguntas juego = new JuegoPreguntas();
-		preguntaCorrecta = juego.lanzarPregunta(sc);
-		return preguntaCorrecta;
+		return juego.lanzarPregunta(sc);
 	}
 
 	public static void numerosSacados() {
@@ -667,10 +600,9 @@ public class ClienteBingo {
 				primero = false;
 				contadorBolas++;
 
-				// Cada 10 numeros, hacemos un salto de linea
 				if (contadorBolas % 30 == 0) {
 					System.out.println();
-					primero = true; // Para que el siguiente numero de la nueva linea no empiece con coma
+					primero = true;
 				}
 			}
 
@@ -691,18 +623,17 @@ public class ClienteBingo {
 			try (Scanner scEstado = new Scanner(fEstado)) {
 				if (scEstado.hasNextLine()) {
 					String primeraLinea = scEstado.nextLine().trim();
-					// Comprobar si la primera linea empieza con el caracter "="
 					if (primeraLinea.startsWith("=")) {
 						ganador = true;
 
-						System.out.println("\n[AVISO] ¡Se ha detectado un ganador en la partida!");
+						System.out.println("\n[AVISO] Se ha detectado un ganador en la partida!");
 						System.out.println("=== CONTENIDO DE ESTADO DE PARTIDA ===");
 						System.out.println(primeraLinea);
 
-						// Mostrar el resto del contenido del archivo
 						while (scEstado.hasNextLine()) {
 							System.out.println(scEstado.nextLine());
 						}
+						System.out.println("=====================================");
 					}
 				}
 			} catch (FileNotFoundException e) {
