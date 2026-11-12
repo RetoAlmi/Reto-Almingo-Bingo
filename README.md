@@ -1,13 +1,36 @@
-# [Almingo - Bingo](https://github.com/RetoAlmi/Reto-Almingo-Bingo)
+# Almingo - Bingo
+
+GitHub: [Bingo](https://github.com/RetoAlmi/Reto-Almingo-Bingo)
 
 ## Índice
+1. [Estructura del proyecto](#estructura-del-proyecto)
+2. [Sistema de archivos](#sistema-de-archivos)
+3. [Funcionamiento del Cliente](#funcionamiento-del-cliente)
+4. [Funcionamiento del Servidor](#funcionamiento-del-servidor)
+5. [Requisitos del Sistema](#requisitos-del-sistema)
 
-1. [Sistema de archivos](https://www.google.com/search?q=%23sistema-de-archivos)
-2. [Funcionamiento del Cliente](https://www.google.com/search?q=%23funcionamiento-del-cliente)
-3. [Funcionamiento del Servidor](https://www.google.com/search?q=%23funcionamiento-del-servidor)
-4. [Requisitos del Sistema](https://www.google.com/search?q=%23requisitos-del-sistema)
+### 1. Estructura del proyecto:
+A continuación se mostrará la estructura utilizada en el proyecto:
+src/
+├── servidor/
+│ 	 └── ServidorBingo.java
+├── cliente/
+│ 	 ├── DatosPregunta.java
+│ 	 ├── JuegoPreguntas.java
+│ 	 └── ClienteBingo.java
+├── README.md
+├── clienteFoto.png
+├── servidorFoto.png
+├── preguntas.txt
+└── Video Completo.mp4
 
-### 1. Sistema de archivos:
+Para establecer conexión:
+Usuario: Alumnado
+Contraseña: Almi26-27
+
+---
+
+### 2. Sistema de archivos:
 
 Los archivos han sido separados en diferentes paquetes por su funcionalidad y organización.
 
@@ -29,12 +52,12 @@ Para el caso del archivo del servidor (el programa que se ejecutaría para contr
 
 ---
 
-### 2. Funcionamiento del Cliente:
+### 3. Funcionamiento del Cliente:
 
 En el cliente, hemos dividido el funcionamiento principal de las preguntas para poder tenerlo por separado.
 
 
-#### 2.1. Funcionamiento principal:
+#### 3.1. Funcionamiento principal:
 
 El funcionamiento principal del código sería el archivo ClienteBingo.java.
 
@@ -72,7 +95,7 @@ El funcionamiento del programa es simple:
 * uid.txt: En este archivo aparece en la primera línea el número UID del usuario y, en la segunda línea, el nombre del jugador.
   
 
-#### 2.2. Funcionamiento de las preguntas:
+#### 3.2. Funcionamiento de las preguntas:
 
 Las preguntas las realizamos en códigos aparte.
 *[DatosPregunta.java:](https://www.google.com/search?q=https://github.com/RetoAlmi/Reto-Almingo-Bingo/blob/main/src/cliente/DatosPregunta.java)*
@@ -92,11 +115,11 @@ juego.lanzarPregunta(sc);
 
 ---
 
-### 3. Funcionamiento del Servidor:
+### 4. Funcionamiento del Servidor:
 
 En el servidor, controlamos el funcionamiento de la partida completa.
 
-#### 3.1. Qué podemos hacer:
+#### 4.1. Qué podemos hacer:
 
 En el menú del servidor, tenemos diferentes opciones para controlar distintas acciones:
 * En la primera opción, podemos iniciar una partida nueva.
@@ -112,7 +135,7 @@ En el menú del servidor, tenemos diferentes opciones para controlar distintas a
 * En la undécima opción, salimos/cerramos el servidor.
 
 
-#### 3.2. Archivos generados y sus funciones:
+#### 4.2. Archivos generados y sus funciones:
 
 Por parte del servidor, se generan diferentes archivos .txt para guardar diferentes datos:
 * partida.txt: Almacena en orden de aparición todas las bolas cantadas por el servidor (una por línea). Sirve para que los clientes sepan qué números han salido.
@@ -124,7 +147,7 @@ Por parte del servidor, se generan diferentes archivos .txt para guardar diferen
 ---
 
 
-### Requisitos del Sistema
+### 5. Requisitos del Sistema
 
 *  **Java Development Kit (JDK):** Versión 8 o superior.
 *  **Java Development Kit (JDK) Recomendado:** Versión 21 o superior.
