@@ -47,6 +47,8 @@ El funcionamiento principal del código sería el archivo ClienteBingo.java.
 * Sistema de Marcado de Números: En nuestro sistema de marcado de números, utilizamos el símbolo "-" por delante del número para marcar los números que ya han salido en el bingo.
 * Herramientas de Administrador: Incluimos una herramienta que nos permite hacer una comprobación masiva de todos los números que han salido en el bingo.
 
+![ClienteBingo](https://github.com/RetoAlmi/Reto-Almingo-Bingo/blob/main/clienteFoto.png?raw=true)
+
 
 **Cómo funciona:**
 El funcionamiento del programa es simple:
@@ -116,6 +118,8 @@ Por parte del servidor, se generan diferentes archivos .txt para guardar diferen
 * partida.txt: Almacena en orden de aparición todas las bolas cantadas por el servidor (una por línea). Sirve para que los clientes sepan qué números han salido.
 * totalBolas.txt: Fichero de contadores rápidos. Contiene exactamente dos líneas: la primera indica el número total de *bolas sacadas* hasta el momento, y la segunda las *bolas restantes* hasta el momento (partiendo de 90).
 * estadoPartida.txt: Archivo de auditoría y registro de ganadores. Si el servidor detecta mediante la opción correspondiente que un jugador ha ganado (`resultado.txt`), escribe en este archivo un bloque detallando el ganador, la sesión y los datos del ganador.
+
+![ServidorBingo](https://github.com/RetoAlmi/Reto-Almingo-Bingo/blob/main/servidorFoto.png?raw=true)
 
 ---
 
